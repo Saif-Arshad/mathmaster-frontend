@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,9 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
-import { HelpCircle, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { HelpCircle, AlertCircle, CheckCircle2, XCircle, Trophy } from 'lucide-react';
 
-// Mock questions by level and sublevel
 const PRACTICE_QUESTIONS = {
   1: { // Level 1
     1: [ // Sublevel 1
@@ -27,7 +25,6 @@ const PRACTICE_QUESTIONS = {
         correctAnswer: '5',
         difficulty: 1
       },
-      // Add more questions
     ],
     2: [ // Sublevel 2
       {
@@ -37,7 +34,6 @@ const PRACTICE_QUESTIONS = {
         correctAnswer: '9',
         difficulty: 1
       },
-      // Add more questions
     ],
     3: [ // Sublevel 3 (quiz prep)
       {
@@ -47,7 +43,6 @@ const PRACTICE_QUESTIONS = {
         correctAnswer: '13',
         difficulty: 1
       },
-      // Add more questions
     ]
   },
   2: { // Level 2
@@ -59,14 +54,10 @@ const PRACTICE_QUESTIONS = {
         correctAnswer: '7',
         difficulty: 2
       },
-      // Add more questions
     ],
-    // Add more sublevels
   },
-  // Add more levels
 };
 
-// Mock quiz questions
 const QUIZ_QUESTIONS = {
   1: [
     {
@@ -130,12 +121,9 @@ const QUIZ_QUESTIONS = {
       correctAnswer: '18'
     }
   ],
-  // Add quizzes for other levels
 };
 
-// Mock hint data
 const getHint = (questionId: string) => {
-  // In a real app, this would come from the backend or AI
   return {
     question: 'What is 1 + 4?',
     steps: [
@@ -174,10 +162,8 @@ const Practice: React.FC = () => {
       return;
     }
     
-    // In a real app, you would fetch the user's current level and sublevel
     if (user) {
       setCurrentLevel(user.level || 1);
-      // Reset other state when user changes
       setCurrentSubLevel(1);
       setCorrectAnswersCount(0);
       setTotalAnswered(0);
@@ -203,13 +189,11 @@ const Practice: React.FC = () => {
     setSelectedAnswer(answer);
     
     if (quizMode) {
-      // In quiz mode, just record the answer without showing correctness
       setQuizAnswers({
         ...quizAnswers,
         [currentQuestionData.id]: answer
       });
       
-      // Move to next question automatically if not the last question
       if (currentQuestion < questions.length - 1) {
         setTimeout(() => {
           setCurrentQuestion(currentQuestion + 1);
@@ -217,29 +201,24 @@ const Practice: React.FC = () => {
         }, 500);
       }
     } else {
-      // In practice mode, show correctness immediately
       const isCorrect = answer === currentQuestionData.correctAnswer;
       setAnswerStatus(isCorrect ? 'correct' : 'incorrect');
       
-      // Update counters
       setTotalAnswered(prev => prev + 1);
       if (isCorrect) {
         setCorrectAnswersCount(prev => prev + 1);
       }
       
-      // For sublevel 3, check if we should show the quiz button
       if (currentSubLevel === 3 && correctAnswersCount >= 2) {
         setShowQuizButton(true);
       }
       
-      // For sublevels 1 and 2, check if we should move to the next sublevel
       if (currentSubLevel < 3 && correctAnswersCount >= 4) {
         toast({
           title: "Sublevel Completed!",
           description: `You've completed sublevel ${currentSubLevel} of level ${currentLevel}.`,
         });
         
-        // Move to the next sublevel
         setCurrentSubLevel(prev => prev + 1);
         setCorrectAnswersCount(0);
         setTotalAnswered(0);
@@ -251,7 +230,6 @@ const Practice: React.FC = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Cycle back to the first question or show more questions
       setCurrentQuestion(0);
     }
     
@@ -282,7 +260,6 @@ const Practice: React.FC = () => {
   };
 
   const handleSubmitQuiz = () => {
-    // Calculate quiz results
     const quizQuestions = QUIZ_QUESTIONS[currentLevel as keyof typeof QUIZ_QUESTIONS] || [];
     let correctCount = 0;
     
@@ -304,14 +281,11 @@ const Practice: React.FC = () => {
     setShowQuizResults(true);
     
     if (passed) {
-      // In a real app, you would update the user's level in the backend
-      // For now, we'll just show a toast
       toast({
         title: "Congratulations!",
         description: `You passed the quiz with ${percentage.toFixed(0)}%. Moving to the next level!`,
       });
       
-      // Update user level in local storage
       const storedUser = localStorage.getItem('mathpath_user');
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
@@ -322,7 +296,6 @@ const Practice: React.FC = () => {
         localStorage.setItem('mathpath_user', JSON.stringify(updatedUser));
       }
       
-      // Reset practice state
       setCurrentLevel(prev => prev + 1);
       setCurrentSubLevel(1);
       setCorrectAnswersCount(0);
@@ -346,7 +319,6 @@ const Practice: React.FC = () => {
     setAnswerStatus(null);
   };
 
-  // If no questions are available, show a message
   if (!currentQuestionData) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -499,7 +471,6 @@ const Practice: React.FC = () => {
           </div>
         )}
         
-        {/* Hint Dialog */}
         <Dialog open={showHint} onOpenChange={setShowHint}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -534,7 +505,6 @@ const Practice: React.FC = () => {
           </DialogContent>
         </Dialog>
         
-        {/* Quiz Results Dialog */}
         <Dialog open={showQuizResults} onOpenChange={setShowQuizResults}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
