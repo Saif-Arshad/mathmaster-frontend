@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Calculator, CheckCircle } from 'lucide-react';
+import axios from 'axios';
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -15,7 +17,7 @@ const ForgotPassword: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email) {
       toast({
         title: "Error",
@@ -24,25 +26,44 @@ const ForgotPassword: React.FC = () => {
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/forgot-password`, { email })
+      if (res.data) {
+        toast({
+          title: "Reset Email Sent",
+          description: res.data.message,
+        });
+        setIsSubmitted(true);
+
+      }
+    } catch (error) {
       toast({
-        title: "Reset Email Sent",
-        description: "Check your email for reset instructions",
+        title: "Error",
+        description: (error as any).response.data.message,
+        variant: "destructive",
       });
-    }, 1500);
+
+    } finally {
+      setIsSubmitting(false);
+    }
+    // Simulate API call
+    // setTimeout(() => {
+    //   setIsSubmitting(false);
+    //   setIsSubmitted(true);
+    //   toast({
+    //     title: "Reset Email Sent",
+    //     description: "Check your email for reset instructions",
+    //   });
+    // }, 1500);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 flex flex-col items-start">
-        
+
           <CardTitle className="text-2xl font-bold text-start">Reset Your Password</CardTitle>
           <CardDescription className="text-start">
             Enter your email to receive a password reset link

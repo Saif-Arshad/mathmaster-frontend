@@ -144,7 +144,7 @@ const INITIAL_QUESTIONS = [
 
 const InitialQuiz: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: string}>({});
+  const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -178,23 +178,23 @@ const InitialQuiz: React.FC = () => {
 
   const handleSubmitQuiz = () => {
     setIsSubmitting(true);
-    
+
     // Calculate score and determine level
     let countingCorrect = 0;
     let additionCorrect = 0;
     let subtractionCorrect = 0;
     let placeValueCorrect = 0;
     let sequenceCorrect = 0;
-    
+
     let totalCounting = 0;
     let totalAddition = 0;
     let totalSubtraction = 0;
     let totalPlaceValue = 0;
     let totalSequence = 0;
-    
+
     INITIAL_QUESTIONS.forEach(question => {
       // Count by type
-      switch(question.type) {
+      switch (question.type) {
         case 'counting':
           totalCounting++;
           if (selectedAnswers[question.id] === question.correctAnswer) countingCorrect++;
@@ -217,25 +217,25 @@ const InitialQuiz: React.FC = () => {
           break;
       }
     });
-    
+
     // Determine level based on performance
     let assignedLevel = 1;
-    
+
     const countingPercentage = totalCounting > 0 ? (countingCorrect / totalCounting) * 100 : 0;
     const additionPercentage = totalAddition > 0 ? (additionCorrect / totalAddition) * 100 : 0;
     const subtractionPercentage = totalSubtraction > 0 ? (subtractionCorrect / totalSubtraction) * 100 : 0;
-    
+
     if (countingPercentage >= 80 && additionPercentage >= 70) {
       assignedLevel = 2; // Advance to subtraction level
-      
+
       if (subtractionPercentage >= 70) {
         assignedLevel = 3; // Advance to place value level
       }
     }
-    
+
     // In a real app, you would save this to the backend
     // For now, we'll just use local storage
-    const storedUser = localStorage.getItem('mathpath_user');
+    const storedUser = localStorage.getItem('mathmaster_user');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       const updatedUser = {
@@ -243,16 +243,16 @@ const InitialQuiz: React.FC = () => {
         level: assignedLevel,
         completedQuiz: true,
         quizResults: {
-          counting: {total: totalCounting, correct: countingCorrect},
-          addition: {total: totalAddition, correct: additionCorrect},
-          subtraction: {total: totalSubtraction, correct: subtractionCorrect},
-          placeValue: {total: totalPlaceValue, correct: placeValueCorrect},
-          numberSequence: {total: totalSequence, correct: sequenceCorrect}
+          counting: { total: totalCounting, correct: countingCorrect },
+          addition: { total: totalAddition, correct: additionCorrect },
+          subtraction: { total: totalSubtraction, correct: subtractionCorrect },
+          placeValue: { total: totalPlaceValue, correct: placeValueCorrect },
+          numberSequence: { total: totalSequence, correct: sequenceCorrect }
         }
       };
-      localStorage.setItem('mathpath_user', JSON.stringify(updatedUser));
+      localStorage.setItem('mathmaster_user', JSON.stringify(updatedUser));
     }
-    
+
     setTimeout(() => {
       toast({
         title: "Assessment Completed!",
@@ -278,7 +278,7 @@ const InitialQuiz: React.FC = () => {
             Let's see what math level is right for you!
           </p>
         </div>
-        
+
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-2">
             <span>Question {currentQuestion + 1} of {INITIAL_QUESTIONS.length}</span>
@@ -286,32 +286,31 @@ const InitialQuiz: React.FC = () => {
           </div>
           <Progress value={progress} className="h-2" />
         </div>
-        
+
         <Card className="mb-6 overflow-hidden shadow-lg">
           <CardContent className="p-6">
             <div className="text-xl font-medium mb-6">
               {currentQuestionData.question}
             </div>
-            
+
             {currentQuestionData.questionImage && (
               <div className="mb-6 flex justify-center">
-                <img 
-                  src={currentQuestionData.questionImage} 
+                <img
+                  src={currentQuestionData.questionImage}
                   alt={`Visual for ${currentQuestionData.question}`}
                   className="rounded-md"
                 />
               </div>
             )}
-            
+
             <div className="space-y-3">
               {currentQuestionData.options.map((option) => (
                 <div
                   key={option}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    selectedAnswers[currentQuestionData.id] === option
+                  className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedAnswers[currentQuestionData.id] === option
                       ? "border-mathpath-purple bg-mathpath-lightPurple"
                       : "border-gray-200 hover:border-mathpath-purple"
-                  }`}
+                    }`}
                   onClick={() => handleSelectAnswer(currentQuestionData.id, option)}
                 >
                   {option}
@@ -320,7 +319,7 @@ const InitialQuiz: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <div className="flex justify-between">
           <Button
             variant="outline"
@@ -329,7 +328,7 @@ const InitialQuiz: React.FC = () => {
           >
             Previous
           </Button>
-          
+
           {isLastQuestion ? (
             <Button
               onClick={handleSubmitQuiz}

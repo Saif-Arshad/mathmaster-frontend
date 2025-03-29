@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Pages
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -22,6 +21,7 @@ import ManageQuestions from "./pages/admin/ManageQuestions";
 import ManageLevels from "./pages/admin/ManageLevels";
 import ManageUsers from "./pages/admin/ManageUsers";
 import QuizReports from "./pages/admin/QuizReports";
+import NewPassword from "./pages/NewPassword";
 
 const queryClient = new QueryClient();
 
@@ -33,7 +33,6 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public routes */}
             <Route path="/login" element={
               <ProtectedRoute requireUnauth={true}>
                 <Login />
@@ -45,13 +44,18 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/verify" element={
-              <ProtectedRoute requireUnauth={false}>
+              <ProtectedRoute requireUnauth={true}>
                 <VerifyOTP />
               </ProtectedRoute>
             } />
             <Route path="/forgot-password" element={
               <ProtectedRoute requireUnauth={true}>
                 <ForgotPassword />
+              </ProtectedRoute>
+            } />
+            <Route path="/new-password" element={
+              <ProtectedRoute requireUnauth={true}>
+                <NewPassword />
               </ProtectedRoute>
             } />
             

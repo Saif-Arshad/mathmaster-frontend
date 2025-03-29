@@ -54,7 +54,6 @@ const Register: React.FC = () => {
 
     try {
       await register(email, username, password, ageNum);
-      navigate('/verify');
     } catch (err) {
       toast({
         title: "Registration failed",

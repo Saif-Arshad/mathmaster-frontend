@@ -11,21 +11,26 @@ import { Calculator } from 'lucide-react';
 const VerifyOTP: React.FC = () => {
   const [otp, setOtp] = useState('');
   const [timeLeft, setTimeLeft] = useState(60);
-  const { verifyOTP, resendOTP, unverifiedEmail, isLoading, error } = useAuth();
+  const { verifyOTP, resendOTP, isLoading, error } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!unverifiedEmail) {
-      navigate('/register');
-    }
-
+   
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [unverifiedEmail, navigate]);
+  }, [ navigate]);
+  // useEffect(() => {
+    
+  //   if (error && error == "Email already in use." || error =="Username already taken."){
+  //     toast.e
+  //   }
+    
+
+  // }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +50,7 @@ const VerifyOTP: React.FC = () => {
         title: "Verification Successful",
         description: "Your account has been verified!",
       });
-      navigate('/initial-quiz');
+      navigate('/login');
     }
   };
 
@@ -61,13 +66,11 @@ const VerifyOTP: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 flex flex-col items-center">
-          <div className="bg-mathpath-purple text-white p-3 rounded-full mb-4">
-            <Calculator size={28} />
-          </div>
-          <CardTitle className="text-2xl font-bold text-center">Verify Your Email</CardTitle>
-          <CardDescription className="text-center">
-            We've sent a verification code to {unverifiedEmail}
+        <CardHeader className="space-y-1 flex flex-col items-start">
+         
+          <CardTitle className="text-2xl font-bold text-start">Verify Your Email</CardTitle>
+          <CardDescription className="text-start">
+            We've sent a verification code to your 
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

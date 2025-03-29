@@ -148,10 +148,10 @@ const Practice: React.FC = () => {
   const [hint, setHint] = useState<{ question: string; steps: string[]; answer: string } | null>(null);
   const [showQuizButton, setShowQuizButton] = useState(false);
   const [quizMode, setQuizMode] = useState(false);
-  const [quizAnswers, setQuizAnswers] = useState<{[key: string]: string}>({});
-  const [quizResults, setQuizResults] = useState<{total: number; correct: number; percentage: number} | null>(null);
+  const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: string }>({});
+  const [quizResults, setQuizResults] = useState<{ total: number; correct: number; percentage: number } | null>(null);
   const [showQuizResults, setShowQuizResults] = useState(false);
-  
+
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
@@ -161,7 +161,7 @@ const Practice: React.FC = () => {
       navigate('/login');
       return;
     }
-    
+
     if (user) {
       setCurrentLevel(user.level || 1);
       setCurrentSubLevel(1);
@@ -175,25 +175,25 @@ const Practice: React.FC = () => {
     }
   }, [isAuthenticated, navigate, user]);
 
-  const questions = quizMode 
+  const questions = quizMode
     ? QUIZ_QUESTIONS[currentLevel as keyof typeof QUIZ_QUESTIONS] || []
     : (PRACTICE_QUESTIONS[currentLevel as keyof typeof PRACTICE_QUESTIONS]?.[
-        currentSubLevel as keyof (typeof PRACTICE_QUESTIONS)[keyof typeof PRACTICE_QUESTIONS]
-      ] || []);
+      currentSubLevel as keyof (typeof PRACTICE_QUESTIONS)[keyof typeof PRACTICE_QUESTIONS]
+    ] || []);
 
   const currentQuestionData = questions[currentQuestion];
 
   const handleSelectAnswer = (answer: string) => {
     if (answerStatus !== null || !currentQuestionData) return;
-    
+
     setSelectedAnswer(answer);
-    
+
     if (quizMode) {
       setQuizAnswers({
         ...quizAnswers,
         [currentQuestionData.id]: answer
       });
-      
+
       if (currentQuestion < questions.length - 1) {
         setTimeout(() => {
           setCurrentQuestion(currentQuestion + 1);
@@ -203,22 +203,22 @@ const Practice: React.FC = () => {
     } else {
       const isCorrect = answer === currentQuestionData.correctAnswer;
       setAnswerStatus(isCorrect ? 'correct' : 'incorrect');
-      
+
       setTotalAnswered(prev => prev + 1);
       if (isCorrect) {
         setCorrectAnswersCount(prev => prev + 1);
       }
-      
+
       if (currentSubLevel === 3 && correctAnswersCount >= 2) {
         setShowQuizButton(true);
       }
-      
+
       if (currentSubLevel < 3 && correctAnswersCount >= 4) {
         toast({
           title: "Sublevel Completed!",
           description: `You've completed sublevel ${currentSubLevel} of level ${currentLevel}.`,
         });
-        
+
         setCurrentSubLevel(prev => prev + 1);
         setCorrectAnswersCount(0);
         setTotalAnswered(0);
@@ -232,14 +232,14 @@ const Practice: React.FC = () => {
     } else {
       setCurrentQuestion(0);
     }
-    
+
     setSelectedAnswer(null);
     setAnswerStatus(null);
   };
 
   const handleShowHint = () => {
     if (!currentQuestionData) return;
-    
+
     const hintData = getHint(currentQuestionData.id);
     setHint(hintData);
     setShowHint(true);
@@ -252,7 +252,7 @@ const Practice: React.FC = () => {
     setAnswerStatus(null);
     setQuizAnswers({});
     setQuizResults(null);
-    
+
     toast({
       title: "Quiz Started",
       description: "Good luck! Try to answer at least 70% correctly.",
@@ -262,40 +262,40 @@ const Practice: React.FC = () => {
   const handleSubmitQuiz = () => {
     const quizQuestions = QUIZ_QUESTIONS[currentLevel as keyof typeof QUIZ_QUESTIONS] || [];
     let correctCount = 0;
-    
+
     quizQuestions.forEach(question => {
       if (quizAnswers[question.id] === question.correctAnswer) {
         correctCount++;
       }
     });
-    
+
     const percentage = (correctCount / quizQuestions.length) * 100;
     const passed = percentage >= 70;
-    
+
     setQuizResults({
       total: quizQuestions.length,
       correct: correctCount,
       percentage
     });
-    
+
     setShowQuizResults(true);
-    
+
     if (passed) {
       toast({
         title: "Congratulations!",
         description: `You passed the quiz with ${percentage.toFixed(0)}%. Moving to the next level!`,
       });
-      
-      const storedUser = localStorage.getItem('mathpath_user');
+
+      const storedUser = localStorage.getItem('mathmaster_user');
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
         const updatedUser = {
           ...parsedUser,
           level: currentLevel + 1
         };
-        localStorage.setItem('mathpath_user', JSON.stringify(updatedUser));
+        localStorage.setItem('mathmaster_user', JSON.stringify(updatedUser));
       }
-      
+
       setCurrentLevel(prev => prev + 1);
       setCurrentSubLevel(1);
       setCorrectAnswersCount(0);
@@ -339,34 +339,34 @@ const Practice: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 flex flex-wrap items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Practice</h1>
             <p className="text-gray-600 mt-1">
-              {quizMode 
-                ? `Level ${currentLevel} Quiz` 
+              {quizMode
+                ? `Level ${currentLevel} Quiz`
                 : `Level ${currentLevel} - Sublevel ${currentSubLevel}`}
             </p>
           </div>
-          
+
           {!quizMode && showQuizButton && (
-            <Button 
+            <Button
               onClick={handleStartQuiz}
               className="mt-4 sm:mt-0 bg-mathpath-purple hover:bg-purple-600 animate-pulse-subtle"
             >
               Take The Quiz
             </Button>
           )}
-          
+
           {quizMode && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500">
                 Question {currentQuestion + 1} of {questions.length}
               </span>
               {currentQuestion === questions.length - 1 && Object.keys(quizAnswers).length === questions.length && (
-                <Button 
+                <Button
                   onClick={handleSubmitQuiz}
                   className="bg-mathpath-purple hover:bg-purple-600"
                 >
@@ -376,7 +376,7 @@ const Practice: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {!quizMode && (
           <div className="flex items-center justify-between mb-4 p-4 bg-white rounded-lg shadow-sm">
             <div>
@@ -385,8 +385,8 @@ const Practice: React.FC = () => {
                 {correctAnswersCount} correct out of {totalAnswered} answered
               </span>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={handleShowHint}
               className="text-mathpath-purple border-mathpath-purple hover:bg-mathpath-lightPurple"
@@ -396,33 +396,31 @@ const Practice: React.FC = () => {
             </Button>
           </div>
         )}
-        
+
         <Card className="mb-6 overflow-hidden shadow-lg">
           <CardContent className="p-6">
             <div className="text-xl font-medium mb-6">
               {currentQuestionData.question}
             </div>
-            
+
             <div className="space-y-3">
               {currentQuestionData.options.map((option) => {
                 const isSelected = selectedAnswer === option;
                 const isCorrect = currentQuestionData.correctAnswer === option;
                 const showCorrect = answerStatus !== null;
-                
+
                 return (
                   <div
                     key={option}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all flex justify-between items-center ${
-                      isSelected
+                    className={`p-4 border rounded-lg cursor-pointer transition-all flex justify-between items-center ${isSelected
                         ? "border-mathpath-purple bg-mathpath-lightPurple"
                         : "border-gray-200 hover:border-mathpath-purple"
-                    } ${
-                      showCorrect && isCorrect
+                      } ${showCorrect && isCorrect
                         ? "border-green-500 bg-green-50"
                         : showCorrect && isSelected && !isCorrect
-                        ? "border-red-500 bg-red-50"
-                        : ""
-                    }`}
+                          ? "border-red-500 bg-red-50"
+                          : ""
+                      }`}
                     onClick={() => handleSelectAnswer(option)}
                   >
                     <span>{option}</span>
@@ -436,21 +434,20 @@ const Practice: React.FC = () => {
                 );
               })}
             </div>
-            
+
             {answerStatus && (
-              <div className={`mt-6 p-4 rounded-lg ${
-                answerStatus === 'correct' 
-                  ? "bg-green-50 text-green-700 border border-green-200" 
+              <div className={`mt-6 p-4 rounded-lg ${answerStatus === 'correct'
+                  ? "bg-green-50 text-green-700 border border-green-200"
                   : "bg-red-50 text-red-700 border border-red-200"
-              }`}>
+                }`}>
                 <div className="flex items-center">
-                  {answerStatus === 'correct' 
+                  {answerStatus === 'correct'
                     ? <CheckCircle2 className="h-5 w-5 mr-2" />
                     : <AlertCircle className="h-5 w-5 mr-2" />
                   }
                   <span className="font-medium">
-                    {answerStatus === 'correct' 
-                      ? "Correct! Great job!" 
+                    {answerStatus === 'correct'
+                      ? "Correct! Great job!"
                       : `Incorrect. The correct answer is ${currentQuestionData.correctAnswer}.`
                     }
                   </span>
@@ -459,7 +456,7 @@ const Practice: React.FC = () => {
             )}
           </CardContent>
         </Card>
-        
+
         {!quizMode && answerStatus !== null && (
           <div className="flex justify-end">
             <Button
@@ -470,7 +467,7 @@ const Practice: React.FC = () => {
             </Button>
           </div>
         )}
-        
+
         <Dialog open={showHint} onOpenChange={setShowHint}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -495,7 +492,7 @@ const Practice: React.FC = () => {
               </div>
             )}
             <DialogFooter>
-              <Button 
+              <Button
                 onClick={() => setShowHint(false)}
                 className="bg-mathpath-purple hover:bg-purple-600"
               >
@@ -504,7 +501,7 @@ const Practice: React.FC = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        
+
         <Dialog open={showQuizResults} onOpenChange={setShowQuizResults}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -512,11 +509,10 @@ const Practice: React.FC = () => {
             </DialogHeader>
             {quizResults && (
               <div className="space-y-4 text-center py-4">
-                <div className={`text-5xl font-bold ${
-                  quizResults.percentage >= 70 
-                    ? "text-green-500" 
+                <div className={`text-5xl font-bold ${quizResults.percentage >= 70
+                    ? "text-green-500"
                     : "text-red-500"
-                }`}>
+                  }`}>
                   {quizResults.percentage.toFixed(0)}%
                 </div>
                 <p>
@@ -548,7 +544,7 @@ const Practice: React.FC = () => {
               </div>
             )}
             <DialogFooter>
-              <Button 
+              <Button
                 onClick={handleCloseQuizResults}
                 className="bg-mathpath-purple hover:bg-purple-600"
               >

@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import axios from 'axios'
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 type User = {
   id: string;
   email: string;
@@ -41,13 +44,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
+  const [userId, setUserId] = useState()
   useEffect(() => {
-    const storedUser = localStorage.getItem('mathpath_user');
+    const storedUser = localStorage.getItem('mathmaster_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
     setIsLoading(false);
+  }, []);
+  useEffect(() => {
+    const storedUser = localStorage.getItem('mathmaster_userID');
+    if (storedUser) {
+      setUserId(JSON.parse(storedUser).id);
+    }
   }, []);
 
   const mockUsers = [
@@ -64,58 +73,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ];
 
   const register = async (email: string, username: string, password: string, age: number) => {
-    setIsLoading(true);
-    setError(null);
-    
+    const payload = {
+      email,
+      username,
+      password,
+      age
+    }
+
+
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const existingUser = mockUsers.find(
-        u => u.email === email || u.username === username
-      );
-      
-      if (existingUser) {
-        throw new Error('User already exists with this email or username');
+
+      setIsLoading(true);
+      setError(null);
+
+
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, payload)
+      console.log("🚀 ~ register ~ res:", res.data)
+      if (res.data) {
+        localStorage.setItem("mathmaster_userID", JSON.stringify({
+          id: res.data.user_id
+        }))
+        window.location.href = "/verify"
+        toast.success(res.data.message)
       }
-      
-      setUnverifiedEmail(email);
-      setIsVerifying(true);
-      
+      else {
+        toast.error("Something went wrong")
+      }
+
+
     } catch (err) {
-      setError((err as Error).message);
+      console.log("🚀 ~ register ~ err:", err)
+      console.log("🚀 ~ register ~ err:", err.response)
+      setError((err as any).response.data.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const verifyOTP = async (otp: string) => {
+    if (!userId) {
+      setError('Please Register First');
+      return
+    }
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (otp.length === 6 && /^\d+$/.test(otp)) {
-        const newUser = {
-          id: String(mockUsers.length + 1),
-          email: unverifiedEmail!,
-          username: `user${Math.floor(Math.random() * 1000)}`,
-          age: 10,
-          level: 0,
-          completedQuiz: false,
-          isAdmin: false
-        };
-        
-        localStorage.setItem('mathpath_user', JSON.stringify(newUser));
-        setUser(newUser);
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/verify-otp`, { user_id: userId, code: otp })
+      if (res.data) {
+        localStorage.setItem('mathmaster_user', JSON.stringify(res.data.user));
+        setUser(res.data.user);
         setIsVerifying(false);
         setUnverifiedEmail(null);
-        return true;
-      } else {
-        throw new Error('Invalid OTP. Please try again.');
+        toast.success(res.data.message)
+        window.location.href = "/login"
+
       }
+
     } catch (err) {
-      setError((err as Error).message);
+      console.log("🚀 ~ verifyOTP ~ err:", err)
+      setError((err as any).response.data.message);
+
       return false;
     } finally {
       setIsLoading(false);
@@ -123,16 +142,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resendOTP = async () => {
+    if (!userId) {
+      setError('Please Register First');
+      return
+    }
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setError('OTP resent successfully!');
-      setTimeout(() => setError(null), 3000);
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/resend-otp`, { user_id: userId })
+      if (res.data) {
+        toast.success(res.data.message)
+      }
     } catch (err) {
-      setError((err as Error).message);
+      setError((err as any).response.data.message);
+
     } finally {
       setIsLoading(false);
     }
@@ -141,31 +165,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const foundUser = mockUsers.find(
-        u => u.username === username && u.password === password
-      );
-      
-      if (!foundUser) {
-        throw new Error('Invalid username or password');
+      const payload = {
+        username,
+        password
       }
-      
-      const { password: _, ...userWithoutPassword } = foundUser;
-      
-      localStorage.setItem('mathpath_user', JSON.stringify(userWithoutPassword));
-      setUser(userWithoutPassword);
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/login`, payload)
+
+
+      if (res.data) {
+
+
+        const { password: _, ...userWithoutPassword } = res.data.user;
+        const userData = {
+          ...userWithoutPassword,
+          token: res.data.token
+        }
+
+        localStorage.setItem('mathmaster_user', JSON.stringify(userData));
+        setUser(userData);
+      }
     } catch (err) {
-      setError((err as Error).message);
+      setError((err as any).response.data.message);
+
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('mathpath_user');
+    localStorage.removeItem('mathmaster_user');
     setUser(null);
   };
 
