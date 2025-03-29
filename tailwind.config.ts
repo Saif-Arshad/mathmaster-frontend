@@ -54,7 +54,7 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				mathpath: {
-					purple: '#8B5CF6',
+					purple: '#3A0871', // Updated to the deep purple color from the image
 					green: '#4ADE80',
 					blue: '#60A5FA',
 					yellow: '#FBBF24',
