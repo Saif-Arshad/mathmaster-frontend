@@ -41,12 +41,10 @@ const ForgotPassword: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 flex flex-col items-center">
-          <div className="bg-mathpath-purple text-white p-3 rounded-full mb-4">
-            <Calculator size={28} />
-          </div>
-          <CardTitle className="text-2xl font-bold text-center">Reset Your Password</CardTitle>
-          <CardDescription className="text-center">
+        <CardHeader className="space-y-1 flex flex-col items-start">
+        
+          <CardTitle className="text-2xl font-bold text-start">Reset Your Password</CardTitle>
+          <CardDescription className="text-start">
             Enter your email to receive a password reset link
           </CardDescription>
         </CardHeader>

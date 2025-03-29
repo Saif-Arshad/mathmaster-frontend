@@ -21,19 +21,18 @@ const Login: React.FC = () => {
       await login(username, password);
       navigate('/');
     } catch (err) {
-      // Error is handled in the auth context
+     console.log("🚀 ~ handleSubmit ~ err:", err)
+     
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 flex flex-col items-center">
-          <div className="bg-mathpath-purple text-white p-3 rounded-full mb-4">
-            <Calculator size={28} />
-          </div>
-          <CardTitle className="text-2xl font-bold text-center">Welcome Back to MathPath</CardTitle>
-          <CardDescription className="text-center">
+        <CardHeader className="space-y-1 flex flex-col items-start">
+          
+          <CardTitle className="text-2xl font-bold text-start">Welcome Back to Math Master</CardTitle>
+          <CardDescription className="text-start">
             Log in to continue your math journey
           </CardDescription>
         </CardHeader>

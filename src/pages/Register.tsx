@@ -67,12 +67,10 @@ const Register: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 flex flex-col items-center">
-          <div className="bg-mathpath-purple text-white p-3 rounded-full mb-4">
-            <Calculator size={28} />
-          </div>
-          <CardTitle className="text-2xl font-bold text-center">Sign Up for MathPath</CardTitle>
-          <CardDescription className="text-center">
+        <CardHeader className="space-y-1 flex flex-col items-start">
+         
+          <CardTitle className="text-2xl font-bold text-start">Sign Up for Math Master</CardTitle>
+          <CardDescription className="text-start">
             Create an account to start your math journey
           </CardDescription>
         </CardHeader>
@@ -89,6 +87,7 @@ const Register: React.FC = () => {
                 required
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input
@@ -105,13 +104,13 @@ const Register: React.FC = () => {
               <Input
                 id="age"
                 type="number"
-                placeholder="Your age (4-12)"
-                min="4"
-                max="12"
+                placeholder="Your age "
+               
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
                 required
               />
+            </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
