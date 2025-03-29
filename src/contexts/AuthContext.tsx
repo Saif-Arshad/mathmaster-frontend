@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 type User = {
@@ -8,6 +7,7 @@ type User = {
   age: number;
   level: number;
   completedQuiz: boolean;
+  isAdmin?: boolean;
 };
 
 type AuthContextType = {
@@ -43,7 +43,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for stored user in localStorage (simulating persistence)
     const storedUser = localStorage.getItem('mathpath_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -51,7 +50,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  // Mock user database - in a real app, this would be in your backend
   const mockUsers = [
     {
       id: '1',
@@ -60,7 +58,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password: 'Password123',
       age: 10,
       level: 1,
-      completedQuiz: true
+      completedQuiz: true,
+      isAdmin: true
     }
   ];
 
@@ -69,10 +68,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     
     try {
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Check if user already exists
       const existingUser = mockUsers.find(
         u => u.email === email || u.username === username
       );
@@ -81,7 +78,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('User already exists with this email or username');
       }
       
-      // In a real app, we would send an OTP to the email
       setUnverifiedEmail(email);
       setIsVerifying(true);
       
@@ -97,22 +93,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     
     try {
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // For demo purposes, any 6-digit OTP is considered valid
       if (otp.length === 6 && /^\d+$/.test(otp)) {
-        // In a real app, we would create the user in the database here
         const newUser = {
           id: String(mockUsers.length + 1),
           email: unverifiedEmail!,
           username: `user${Math.floor(Math.random() * 1000)}`,
           age: 10,
-          level: 0, // Initial level before assessment
-          completedQuiz: false
+          level: 0,
+          completedQuiz: false,
+          isAdmin: false
         };
         
-        // Store user in localStorage (simulating persistence)
         localStorage.setItem('mathpath_user', JSON.stringify(newUser));
         setUser(newUser);
         setIsVerifying(false);
@@ -134,11 +127,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     
     try {
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // In a real app, we would resend the OTP to the email
-      // For now, we just show a success message
       setError('OTP resent successfully!');
       setTimeout(() => setError(null), 3000);
     } catch (err) {
@@ -153,7 +143,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     
     try {
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const foundUser = mockUsers.find(
@@ -164,10 +153,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Invalid username or password');
       }
       
-      // Remove password from user object before storing
       const { password: _, ...userWithoutPassword } = foundUser;
       
-      // Store user in localStorage (simulating persistence)
       localStorage.setItem('mathpath_user', JSON.stringify(userWithoutPassword));
       setUser(userWithoutPassword);
     } catch (err) {
