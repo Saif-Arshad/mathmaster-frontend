@@ -1,24 +1,33 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
 
-const NotFound = () => {
-  const location = useLocation();
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Calculator } from 'lucide-react';
 
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
-
+const NotFound: React.FC = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+      <div className="bg-mathpath-purple text-white p-4 rounded-full mb-6">
+        <Calculator size={36} />
+      </div>
+      
+      <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
+      <p className="text-xl text-gray-600 mb-8 text-center">
+        Oops! We couldn't find this page.
+      </p>
+      
+      <div className="space-y-4 w-full max-w-xs">
+        <Link to="/">
+          <Button className="w-full bg-mathpath-purple hover:bg-purple-600">
+            Go to Home
+          </Button>
+        </Link>
+        
+        <Link to="/practice">
+          <Button variant="outline" className="w-full">
+            Go to Practice
+          </Button>
+        </Link>
       </div>
     </div>
   );
