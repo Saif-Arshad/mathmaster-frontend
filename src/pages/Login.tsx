@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { Calculator, Eye, EyeOff } from 'lucide-react';
+import {  Eye, EyeOff } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -19,7 +19,6 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       await login(username, password);
-      navigate('/');
     } catch (err) {
      console.log("🚀 ~ handleSubmit ~ err:", err)
      
