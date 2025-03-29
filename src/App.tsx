@@ -62,11 +62,11 @@ const App = () => (
               } 
             />
             
-            {/* Protected routes */}
+            {/* Protected routes - removed requireAuth */}
             <Route 
               path="/" 
               element={
-                <ProtectedRoute requireAuth requireCompletedQuiz>
+                <ProtectedRoute requireCompletedQuiz>
                   <Home />
                 </ProtectedRoute>
               } 
@@ -74,7 +74,7 @@ const App = () => (
             <Route 
               path="/initial-quiz" 
               element={
-                <ProtectedRoute requireAuth>
+                <ProtectedRoute>
                   <InitialQuiz />
                 </ProtectedRoute>
               } 
@@ -82,7 +82,7 @@ const App = () => (
             <Route 
               path="/practice" 
               element={
-                <ProtectedRoute requireAuth requireCompletedQuiz>
+                <ProtectedRoute requireCompletedQuiz>
                   <Practice />
                 </ProtectedRoute>
               } 
@@ -90,7 +90,7 @@ const App = () => (
             <Route 
               path="/quiz-results" 
               element={
-                <ProtectedRoute requireAuth requireCompletedQuiz>
+                <ProtectedRoute requireCompletedQuiz>
                   <QuizResults />
                 </ProtectedRoute>
               } 
