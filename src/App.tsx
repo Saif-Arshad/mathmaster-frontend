@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
 import Home from "./pages/Home";
@@ -33,23 +34,75 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/verify" element={<VerifyOTP />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/login" element={
+              <ProtectedRoute requireUnauth={true}>
+                <Login />
+              </ProtectedRoute>
+            } />
+            <Route path="/register" element={
+              <ProtectedRoute requireUnauth={true}>
+                <Register />
+              </ProtectedRoute>
+            } />
+            <Route path="/verify" element={
+              <ProtectedRoute requireUnauth={false}>
+                <VerifyOTP />
+              </ProtectedRoute>
+            } />
+            <Route path="/forgot-password" element={
+              <ProtectedRoute requireUnauth={true}>
+                <ForgotPassword />
+              </ProtectedRoute>
+            } />
             
             {/* User routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/initial-quiz" element={<InitialQuiz />} />
-            <Route path="/practice" element={<Practice />} />
-            <Route path="/quiz-results" element={<QuizResults />} />
+            <Route path="/" element={
+              <ProtectedRoute requireAuth={true}>
+                <Home />
+              </ProtectedRoute>
+            } />
+            <Route path="/initial-quiz" element={
+              <ProtectedRoute requireAuth={true}>
+                <InitialQuiz />
+              </ProtectedRoute>
+            } />
+            <Route path="/practice" element={
+              <ProtectedRoute requireAuth={true}>
+                <Practice />
+              </ProtectedRoute>
+            } />
+            <Route path="/quiz-results" element={
+              <ProtectedRoute requireAuth={true}>
+                <QuizResults />
+              </ProtectedRoute>
+            } />
             
             {/* Admin routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/questions" element={<ManageQuestions />} />
-            <Route path="/admin/levels" element={<ManageLevels />} />
-            <Route path="/admin/users" element={<ManageUsers />} />
-            <Route path="/admin/reports" element={<QuizReports />} />
+            <Route path="/admin" element={
+              <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/questions" element={
+              <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                <ManageQuestions />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/levels" element={
+              <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                <ManageLevels />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                <ManageUsers />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/reports" element={
+              <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                <QuizReports />
+              </ProtectedRoute>
+            } />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
