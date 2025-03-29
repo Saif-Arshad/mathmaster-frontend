@@ -8,13 +8,15 @@ interface ProtectedRouteProps {
   requireAuth?: boolean;
   requireUnauth?: boolean;
   requireCompletedQuiz?: boolean;
+  requireAdmin?: boolean;
 }
 
 const ProtectedRoute = ({ 
   children, 
   requireAuth = false,
   requireUnauth = false,
-  requireCompletedQuiz = false
+  requireCompletedQuiz = false,
+  requireAdmin = false
 }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, user } = useAuth();
   const navigate = useNavigate();
@@ -33,6 +35,10 @@ const ProtectedRoute = ({
     if (requireCompletedQuiz && isAuthenticated && !user?.completedQuiz) {
       navigate('/initial-quiz');
     }
+
+    if (requireAdmin && (!isAuthenticated || !user?.isAdmin)) {
+      navigate('/');
+    }
   }, [
     isAuthenticated, 
     isLoading, 
@@ -40,6 +46,7 @@ const ProtectedRoute = ({
     requireAuth, 
     requireUnauth, 
     requireCompletedQuiz,
+    requireAdmin,
     user
   ]);
 

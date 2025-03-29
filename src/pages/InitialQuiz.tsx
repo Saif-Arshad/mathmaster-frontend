@@ -8,112 +8,137 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowRight } from 'lucide-react';
 
-// Mock questions for the initial assessment
+// Updated mock questions following the new curriculum
 const INITIAL_QUESTIONS = [
   {
     id: 1,
-    question: 'What is 5 + 3?',
-    options: ['7', '8', '9', '10'],
-    correctAnswer: '8',
-    difficulty: 1
+    question: 'How many apples are there?',
+    questionImage: 'https://placehold.co/200x100/FFC0CB/FFFFFF?text=3+apples',
+    options: ['2', '3', '4', '5'],
+    correctAnswer: '3',
+    difficulty: 1,
+    type: 'counting'
   },
   {
     id: 2,
-    question: 'What is 10 - 4?',
+    question: 'Count the number of pencils.',
+    questionImage: 'https://placehold.co/200x100/ADD8E6/FFFFFF?text=5+pencils',
     options: ['4', '5', '6', '7'],
-    correctAnswer: '6',
-    difficulty: 1
+    correctAnswer: '5',
+    difficulty: 1,
+    type: 'counting'
   },
   {
     id: 3,
-    question: 'What is 3 × 2?',
-    options: ['5', '6', '7', '8'],
-    correctAnswer: '6',
-    difficulty: 1
+    question: 'What number comes after 7?',
+    options: ['6', '7', '8', '9'],
+    correctAnswer: '8',
+    difficulty: 1,
+    type: 'number_sequence'
   },
   {
     id: 4,
-    question: 'What is 8 ÷ 2?',
-    options: ['2', '3', '4', '5'],
+    question: 'What number comes before 5?',
+    options: ['2', '3', '4', '6'],
     correctAnswer: '4',
-    difficulty: 1
+    difficulty: 1,
+    type: 'number_sequence'
   },
   {
     id: 5,
-    question: 'What is 15 + 7?',
-    options: ['21', '22', '23', '24'],
-    correctAnswer: '22',
-    difficulty: 2
+    question: 'What is 2 + 3?',
+    questionImage: 'https://placehold.co/200x100/98FB98/FFFFFF?text=2%2B3',
+    options: ['4', '5', '6', '7'],
+    correctAnswer: '5',
+    difficulty: 1,
+    type: 'addition'
   },
   {
     id: 6,
-    question: 'What is 20 - 8?',
-    options: ['10', '11', '12', '13'],
-    correctAnswer: '12',
-    difficulty: 2
+    question: 'What is 1 + 4?',
+    questionImage: 'https://placehold.co/200x100/98FB98/FFFFFF?text=1%2B4',
+    options: ['3', '4', '5', '6'],
+    correctAnswer: '5',
+    difficulty: 1,
+    type: 'addition'
   },
   {
     id: 7,
-    question: 'What is 6 × 4?',
-    options: ['22', '24', '26', '28'],
-    correctAnswer: '24',
-    difficulty: 2
+    question: 'Count the total number of objects.',
+    questionImage: 'https://placehold.co/200x100/FFC0CB/FFFFFF?text=3+oranges+%2B+2+apples',
+    options: ['3', '4', '5', '6'],
+    correctAnswer: '5',
+    difficulty: 1,
+    type: 'addition'
   },
   {
     id: 8,
-    question: 'What is 25 ÷ 5?',
-    options: ['3', '4', '5', '6'],
-    correctAnswer: '5',
-    difficulty: 2
+    question: 'What is 5 - 2?',
+    questionImage: 'https://placehold.co/200x100/FFFFE0/FFFFFF?text=5-2',
+    options: ['2', '3', '4', '5'],
+    correctAnswer: '3',
+    difficulty: 2,
+    type: 'subtraction'
   },
   {
     id: 9,
-    question: 'What is 36 + 19?',
-    options: ['53', '54', '55', '56'],
-    correctAnswer: '55',
-    difficulty: 3
+    question: 'If you have 4 candies and eat 1, how many are left?',
+    questionImage: 'https://placehold.co/200x100/FFFFE0/FFFFFF?text=4-1',
+    options: ['1', '2', '3', '4'],
+    correctAnswer: '3',
+    difficulty: 2,
+    type: 'subtraction'
   },
   {
     id: 10,
-    question: 'What is 42 - 17?',
-    options: ['23', '24', '25', '26'],
-    correctAnswer: '25',
-    difficulty: 3
+    question: 'What is the ones place in the number 24?',
+    options: ['2', '4', '24', '0'],
+    correctAnswer: '4',
+    difficulty: 3,
+    type: 'place_value'
   },
   {
     id: 11,
-    question: 'What is 7 × 8?',
-    options: ['54', '56', '58', '60'],
-    correctAnswer: '56',
-    difficulty: 3
+    question: 'What is the tens place in the number 57?',
+    options: ['5', '7', '57', '0'],
+    correctAnswer: '5',
+    difficulty: 3,
+    type: 'place_value'
   },
   {
     id: 12,
-    question: 'What is 72 ÷ 9?',
-    options: ['6', '7', '8', '9'],
-    correctAnswer: '8',
-    difficulty: 3
+    question: 'What number comes after 19?',
+    options: ['18', '19', '20', '21'],
+    correctAnswer: '20',
+    difficulty: 2,
+    type: 'number_sequence'
   },
   {
     id: 13,
-    question: 'If you have 5 apples and eat 2, how many are left?',
-    options: ['2', '3', '4', '5'],
-    correctAnswer: '3',
-    difficulty: 1
+    question: 'What is 7 + 3?',
+    questionImage: 'https://placehold.co/200x100/98FB98/FFFFFF?text=7%2B3',
+    options: ['9', '10', '11', '12'],
+    correctAnswer: '10',
+    difficulty: 2,
+    type: 'addition'
   },
   {
     id: 14,
-    question: 'If 1 pencil costs 5 coins, how many coins do you need for 3 pencils?',
-    options: ['10', '15', '20', '25'],
-    correctAnswer: '15',
-    difficulty: 2
+    question: 'If you have 5 pens and get 3 more, how many pens do you have in total?',
+    questionImage: 'https://placehold.co/200x100/ADD8E6/FFFFFF?text=5+pens+%2B+3+pens',
+    options: ['7', '8', '9', '10'],
+    correctAnswer: '8',
+    difficulty: 2,
+    type: 'addition'
   },
   {
     id: 15,
-    question: 'A book has 60 pages. If you read 15 pages each day, how many days will it take to finish the book?',
-    options: ['3', '4', '5', '6'],
-    correctAnswer: '4',
-    difficulty: 3
+    question: 'What is 8 - 5?',
+    questionImage: 'https://placehold.co/200x100/FFFFE0/FFFFFF?text=8-5',
+    options: ['2', '3', '4', '5'],
+    correctAnswer: '3',
+    difficulty: 2,
+    type: 'subtraction'
   }
 ];
 
@@ -155,20 +180,57 @@ const InitialQuiz: React.FC = () => {
     setIsSubmitting(true);
     
     // Calculate score and determine level
-    let correctAnswers = 0;
+    let countingCorrect = 0;
+    let additionCorrect = 0;
+    let subtractionCorrect = 0;
+    let placeValueCorrect = 0;
+    let sequenceCorrect = 0;
+    
+    let totalCounting = 0;
+    let totalAddition = 0;
+    let totalSubtraction = 0;
+    let totalPlaceValue = 0;
+    let totalSequence = 0;
+    
     INITIAL_QUESTIONS.forEach(question => {
-      if (selectedAnswers[question.id] === question.correctAnswer) {
-        correctAnswers++;
+      // Count by type
+      switch(question.type) {
+        case 'counting':
+          totalCounting++;
+          if (selectedAnswers[question.id] === question.correctAnswer) countingCorrect++;
+          break;
+        case 'addition':
+          totalAddition++;
+          if (selectedAnswers[question.id] === question.correctAnswer) additionCorrect++;
+          break;
+        case 'subtraction':
+          totalSubtraction++;
+          if (selectedAnswers[question.id] === question.correctAnswer) subtractionCorrect++;
+          break;
+        case 'place_value':
+          totalPlaceValue++;
+          if (selectedAnswers[question.id] === question.correctAnswer) placeValueCorrect++;
+          break;
+        case 'number_sequence':
+          totalSequence++;
+          if (selectedAnswers[question.id] === question.correctAnswer) sequenceCorrect++;
+          break;
       }
     });
     
-    const percentageCorrect = (correctAnswers / INITIAL_QUESTIONS.length) * 100;
+    // Determine level based on performance
     let assignedLevel = 1;
     
-    if (percentageCorrect >= 80) {
-      assignedLevel = 3;
-    } else if (percentageCorrect >= 50) {
-      assignedLevel = 2;
+    const countingPercentage = totalCounting > 0 ? (countingCorrect / totalCounting) * 100 : 0;
+    const additionPercentage = totalAddition > 0 ? (additionCorrect / totalAddition) * 100 : 0;
+    const subtractionPercentage = totalSubtraction > 0 ? (subtractionCorrect / totalSubtraction) * 100 : 0;
+    
+    if (countingPercentage >= 80 && additionPercentage >= 70) {
+      assignedLevel = 2; // Advance to subtraction level
+      
+      if (subtractionPercentage >= 70) {
+        assignedLevel = 3; // Advance to place value level
+      }
     }
     
     // In a real app, you would save this to the backend
@@ -179,15 +241,22 @@ const InitialQuiz: React.FC = () => {
       const updatedUser = {
         ...parsedUser,
         level: assignedLevel,
-        completedQuiz: true
+        completedQuiz: true,
+        quizResults: {
+          counting: {total: totalCounting, correct: countingCorrect},
+          addition: {total: totalAddition, correct: additionCorrect},
+          subtraction: {total: totalSubtraction, correct: subtractionCorrect},
+          placeValue: {total: totalPlaceValue, correct: placeValueCorrect},
+          numberSequence: {total: totalSequence, correct: sequenceCorrect}
+        }
       };
       localStorage.setItem('mathpath_user', JSON.stringify(updatedUser));
     }
     
     setTimeout(() => {
       toast({
-        title: "Quiz Completed!",
-        description: `You answered ${correctAnswers} out of ${INITIAL_QUESTIONS.length} questions correctly.`,
+        title: "Assessment Completed!",
+        description: `Based on your results, we've determined your optimal starting level.`,
       });
       setIsSubmitting(false);
       navigate('/');
@@ -223,6 +292,16 @@ const InitialQuiz: React.FC = () => {
             <div className="text-xl font-medium mb-6">
               {currentQuestionData.question}
             </div>
+            
+            {currentQuestionData.questionImage && (
+              <div className="mb-6 flex justify-center">
+                <img 
+                  src={currentQuestionData.questionImage} 
+                  alt={`Visual for ${currentQuestionData.question}`}
+                  className="rounded-md"
+                />
+              </div>
+            )}
             
             <div className="space-y-3">
               {currentQuestionData.options.map((option) => (

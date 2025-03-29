@@ -17,6 +17,11 @@ import Practice from "./pages/Practice";
 import QuizResults from "./pages/QuizResults";
 import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageQuestions from "./pages/admin/ManageQuestions";
+import ManageLevels from "./pages/admin/ManageLevels";
+import ManageUsers from "./pages/admin/ManageUsers";
+import QuizReports from "./pages/admin/QuizReports";
 
 const queryClient = new QueryClient();
 
@@ -62,11 +67,11 @@ const App = () => (
               } 
             />
             
-            {/* Protected routes - removed requireAuth */}
+            {/* User routes - removed requireCompletedQuiz */}
             <Route 
               path="/" 
               element={
-                <ProtectedRoute requireCompletedQuiz>
+                <ProtectedRoute>
                   <Home />
                 </ProtectedRoute>
               } 
@@ -82,7 +87,7 @@ const App = () => (
             <Route 
               path="/practice" 
               element={
-                <ProtectedRoute requireCompletedQuiz>
+                <ProtectedRoute>
                   <Practice />
                 </ProtectedRoute>
               } 
@@ -90,8 +95,50 @@ const App = () => (
             <Route 
               path="/quiz-results" 
               element={
-                <ProtectedRoute requireCompletedQuiz>
+                <ProtectedRoute>
                   <QuizResults />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin routes */}
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/questions" 
+              element={
+                <ProtectedRoute requireAdmin>
+                  <ManageQuestions />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/levels" 
+              element={
+                <ProtectedRoute requireAdmin>
+                  <ManageLevels />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/users" 
+              element={
+                <ProtectedRoute requireAdmin>
+                  <ManageUsers />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/reports" 
+              element={
+                <ProtectedRoute requireAdmin>
+                  <QuizReports />
                 </ProtectedRoute>
               } 
             />
