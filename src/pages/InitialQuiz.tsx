@@ -293,16 +293,6 @@ const InitialQuiz: React.FC = () => {
               {currentQuestionData.question}
             </div>
 
-            {currentQuestionData.questionImage && (
-              <div className="mb-6 flex justify-center">
-                <img
-                  src={currentQuestionData.questionImage}
-                  alt={`Visual for ${currentQuestionData.question}`}
-                  className="rounded-md"
-                />
-              </div>
-            )}
-
             <div className="space-y-3">
               {currentQuestionData.options.map((option) => (
                 <div
