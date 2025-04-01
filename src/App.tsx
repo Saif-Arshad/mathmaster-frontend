@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,6 +19,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageQuestions from "./pages/admin/ManageQuestions";
 import ManageLevels from "./pages/admin/ManageLevels";
 import ManageUsers from "./pages/admin/ManageUsers";
+import UserDetails from "./pages/admin/UserDetails";
+import SystemSettings from "./pages/admin/SystemSettings";
 import QuizReports from "./pages/admin/QuizReports";
 import NewPassword from "./pages/NewPassword";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -65,7 +66,6 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* User routes */}
             <Route path="/" element={
               <ProtectedRoute requireAuth={true}>
                 <Home />
@@ -87,7 +87,6 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* Admin routes */}
             <Route path="/admin" element={
               <ProtectedRoute requireAuth={true} requireAdmin={true}>
                 <AdminDashboard />
@@ -108,13 +107,22 @@ const App = () => (
                 <ManageUsers />
               </ProtectedRoute>
             } />
+            <Route path="/admin/users/:userId" element={
+              <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                <UserDetails />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                <SystemSettings />
+              </ProtectedRoute>
+            } />
             <Route path="/admin/reports" element={
               <ProtectedRoute requireAuth={true} requireAdmin={true}>
                 <QuizReports />
               </ProtectedRoute>
             } />
             
-            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

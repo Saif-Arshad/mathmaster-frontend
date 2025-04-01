@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, Search, MoreHorizontal, Ban, Mail, Eye, RotateCw } from 'lucide-react';
 
 // Sample data
@@ -61,6 +63,8 @@ const ManageUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   const filteredUsers = sampleUsers.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -71,8 +75,22 @@ const ManageUsers: React.FC = () => {
     if (action === 'email') {
       setSelectedUserId(userId);
       setIsEmailDialogOpen(true);
+    } else if (action === 'view') {
+      navigate(`/admin/users/${userId}`);
+    } else if (action === 'reset') {
+      const user = sampleUsers.find(u => u.id === userId);
+      toast({
+        title: "Password reset",
+        description: `A password reset link has been sent to ${user?.email}.`,
+      });
+    } else if (action === 'block') {
+      const user = sampleUsers.find(u => u.id === userId);
+      const newStatus = user?.status === 'active' ? 'blocked' : 'active';
+      toast({
+        title: newStatus === 'active' ? "User unblocked" : "User blocked",
+        description: `${user?.name} has been ${newStatus === 'active' ? 'unblocked' : 'blocked'} successfully.`,
+      });
     }
-    // Other actions would be implemented here
   };
   
   return (

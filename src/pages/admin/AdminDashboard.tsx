@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +21,6 @@ const AdminDashboard: React.FC = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={logout}
-
                 className="flex items-center gap-1"
               >
                 <LogOut size={16} />
@@ -110,23 +108,25 @@ const AdminDashboard: React.FC = () => {
             </Card>
           </Link>
 
-          <Card className="h-full transition-all hover:shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Settings className="mr-2 h-5 w-5 text-mathpath-purple" />
-                System Settings
-              </CardTitle>
-              <CardDescription>Configure system parameters</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500 mb-4">
-                Adjust quiz passing percentages and other system settings
-              </p>
-              <Button className="w-full bg-mathpath-purple hover:bg-purple-600">
-                Edit Settings
-              </Button>
-            </CardContent>
-          </Card>
+          <Link to="/admin/settings" className="block">
+            <Card className="h-full transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="mr-2 h-5 w-5 text-mathpath-purple" />
+                  System Settings
+                </CardTitle>
+                <CardDescription>Configure system parameters</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500 mb-4">
+                  Adjust quiz passing percentages and other system settings
+                </p>
+                <Button className="w-full bg-mathpath-purple hover:bg-purple-600">
+                  Edit Settings
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       </main>
     </div>
