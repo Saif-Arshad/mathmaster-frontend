@@ -3,21 +3,31 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, BookOpen, BarChart, Settings, Layers } from 'lucide-react';
+import { Users, BookOpen, BarChart, Settings, Layers, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
+    const { logout } = useAuth();
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <span className="text-2xl font-bold text-mathpath-purple">MathPath Admin</span>
+              <span className="text-2xl font-bold text-mathpath-purple">MathMaster Admin</span>
             </div>
             <div>
-              <Link to="/">
-                <Button variant="outline" size="sm">Return to App</Button>
-              </Link>
+                <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={logout}
+
+                className="flex items-center gap-1"
+              >
+                <LogOut size={16} />
+                <span className="hidden md:inline">Logout</span>
+              </Button>
             </div>
           </div>
         </div>

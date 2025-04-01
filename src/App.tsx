@@ -22,6 +22,7 @@ import ManageLevels from "./pages/admin/ManageLevels";
 import ManageUsers from "./pages/admin/ManageUsers";
 import QuizReports from "./pages/admin/QuizReports";
 import NewPassword from "./pages/NewPassword";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,11 @@ const App = () => (
             <Route path="/forgot-password" element={
               <ProtectedRoute requireUnauth={true}>
                 <ForgotPassword />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin-login" element={
+              <ProtectedRoute requireUnauth={true}>
+                <AdminLogin />
               </ProtectedRoute>
             } />
             <Route path="/new-password" element={

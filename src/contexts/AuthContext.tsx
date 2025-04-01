@@ -21,6 +21,7 @@ type AuthContextType = {
   register: (email: string, username: string, password: string, age: number) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  loginAdmin: any;
   verifyOTP: (otp: string) => Promise<boolean>;
   resendOTP: () => Promise<void>;
   unverifiedEmail: string | null;
@@ -59,18 +60,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const mockUsers = [
-    {
-      id: '1',
-      email: 'test@example.com',
-      username: 'testuser',
-      password: 'Password123',
-      age: 10,
-      level: 1,
-      completedQuiz: true,
-      isAdmin: true
-    }
-  ];
 
   const register = async (email: string, username: string, password: string, age: number) => {
     const payload = {
@@ -185,6 +174,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         localStorage.setItem('mathmaster_user', JSON.stringify(userData));
         setUser(userData);
+
+      }
+    } catch (err) {
+      setError((err as any).response.data.message);
+
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const loginAdmin = async (username: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const payload = {
+        email: username,
+        password
+      }
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/admin/login`, payload)
+
+
+      if (res.data) {
+
+
+        const { password: _, ...userWithoutPassword } = res.data.admin;
+        const userData = {
+          ...userWithoutPassword,
+          token: res.data.token,
+          username:"admin",
+          isAdmin:true
+        }
+
+        localStorage.setItem('mathmaster_user', JSON.stringify(userData));
+        setUser(userData);
+
       }
     } catch (err) {
       setError((err as any).response.data.message);
@@ -210,6 +234,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         verifyOTP,
+        loginAdmin,
         resendOTP,
         unverifiedEmail,
         error,

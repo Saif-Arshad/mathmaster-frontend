@@ -67,10 +67,13 @@ const Home: React.FC = () => {
     if (!isAuthenticated) {
       navigate('/login');
     }
-    
+
     // In a real app, you would fetch the user's progress from the backend
     // For now, we'll just use mock data
     if (user) {
+      if (user.isAdmin == true) {
+        navigate("/admin")
+      }
       setProgress({
         ...mockProgress,
         currentLevel: user.level || 1
@@ -81,19 +84,18 @@ const Home: React.FC = () => {
   const renderSubLevelMarker = (levelId: number, subLevelIndex: number) => {
     const isCompleted = progress.subLevels[levelId]?.completed[subLevelIndex] || false;
     const isCurrentLevel = levelId === progress.currentLevel;
-    const isPreviousSubLevelCompleted = 
+    const isPreviousSubLevelCompleted =
       subLevelIndex === 0 || progress.subLevels[levelId]?.completed[subLevelIndex - 1];
     const isActive = isCurrentLevel && isPreviousSubLevelCompleted && !isCompleted;
-    
+
     return (
-      <div 
-        className={`relative w-10 h-10 rounded-full flex items-center justify-center ${
-          isCompleted 
-            ? "bg-mathpath-green text-white" 
-            : isActive
-              ? "bg-mathpath-purple text-white animate-pulse-subtle"
-              : "bg-gray-200 text-gray-400"
-        }`}
+      <div
+        className={`relative w-10 h-10 rounded-full flex items-center justify-center ${isCompleted
+          ? "bg-mathpath-green text-white"
+          : isActive
+            ? "bg-mathpath-purple text-white animate-pulse-subtle"
+            : "bg-gray-200 text-gray-400"
+          }`}
       >
         {subLevelIndex === 2 && isCompleted && (
           <div className="absolute -top-1 -right-1">
@@ -108,7 +110,7 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Your Math Journey</h1>
@@ -116,7 +118,7 @@ const Home: React.FC = () => {
             Track your progress and continue learning
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <Card className="shadow-md">
@@ -134,12 +136,12 @@ const Home: React.FC = () => {
                       {index < levels.length - 1 && (
                         <div className="absolute left-6 top-14 w-0.5 h-14 bg-gray-200"></div>
                       )}
-                      
+
                       <div className="flex items-start">
                         <div className={`shrink-0 w-12 h-12 rounded-full ${level.color} text-white flex items-center justify-center`}>
                           {level.icon}
                         </div>
-                        
+
                         <div className="ml-4 flex-1">
                           <h3 className="font-medium text-lg text-gray-900">
                             Level {level.id}: {level.name}
@@ -147,7 +149,7 @@ const Home: React.FC = () => {
                           <p className="text-gray-500 text-sm mb-4">
                             {level.description}
                           </p>
-                          
+
                           <div className="flex items-center space-x-6">
                             {[0, 1, 2].map((subLevel) => (
                               <div key={subLevel} className="flex flex-col items-center">
@@ -166,7 +168,7 @@ const Home: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-          
+
           <div>
             <Card className="shadow-md mb-6">
               <CardHeader>
@@ -184,7 +186,7 @@ const Home: React.FC = () => {
                     {levels[progress.currentLevel - 1]?.description}
                   </p>
                 </div>
-                
+
                 <div className="mt-6">
                   <Link to="/practice">
                     <Button className="w-full bg-mathpath-purple hover:bg-purple-600 flex items-center justify-center">
@@ -195,7 +197,7 @@ const Home: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-md">
               <CardHeader>
                 <CardTitle>Tips for Success</CardTitle>
