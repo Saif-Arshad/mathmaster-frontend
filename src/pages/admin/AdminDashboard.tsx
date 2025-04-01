@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, BookOpen, BarChart, Settings, Layers, LogOut } from 'lucide-react';
+import { Users, BookOpen, BarChart, Settings, Layers, LogOut, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
@@ -69,6 +70,23 @@ const AdminDashboard: React.FC = () => {
               <CardContent>
                 <p className="text-sm text-gray-500">
                   Modify practice and quiz questions across all levels
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/admin/initial-quiz" className="block">
+            <Card className="h-full transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <HelpCircle className="mr-2 h-5 w-5 text-mathpath-purple" />
+                  Manage Initial Quiz
+                </CardTitle>
+                <CardDescription>Configure placement assessment</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">
+                  Add, edit or delete questions in the initial assessment quiz
                 </p>
               </CardContent>
             </Card>

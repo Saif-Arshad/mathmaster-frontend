@@ -19,6 +19,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageQuestions from "./pages/admin/ManageQuestions";
+import ManageInitialQuiz from "./pages/admin/ManageInitialQuiz";
 import ManageLevels from "./pages/admin/ManageLevels";
 import ManageUsers from "./pages/admin/ManageUsers";
 import UserDetails from "./pages/admin/UserDetails";
@@ -99,6 +100,11 @@ const App: React.FC = () => {
               <Route path="/admin/questions" element={
                 <ProtectedRoute requireAuth={true} requireAdmin={true}>
                   <ManageQuestions />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/initial-quiz" element={
+                <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                  <ManageInitialQuiz />
                 </ProtectedRoute>
               } />
               <Route path="/admin/levels" element={
