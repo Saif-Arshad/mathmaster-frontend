@@ -14,8 +14,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 const settingsSchema = z.object({
   quizPassingPercentage: z.coerce.number().min(50, "Minimum passing percentage is 50%").max(100, "Maximum passing percentage is 100%"),
-  maxAttemptsPerQuiz: z.coerce.number().min(1, "Minimum attempts is 1").max(10, "Maximum attempts is 10"),
-  initialLevelForNewUsers: z.coerce.number().min(1, "Minimum level is 1").max(5, "Maximum level is 5"),
   practiceQuestionsPerLevel: z.coerce.number().min(5, "Minimum practice questions is 5").max(50, "Maximum practice questions is 50"),
 });
 
@@ -24,11 +22,8 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 const SystemSettings: React.FC = () => {
   const { toast } = useToast();
   
-  // Simulated initial settings - in a real app, these would come from an API
   const defaultValues = {
     quizPassingPercentage: 70,
-    maxAttemptsPerQuiz: 3,
-    initialLevelForNewUsers: 1,
     practiceQuestionsPerLevel: 10
   };
   
@@ -89,41 +84,7 @@ const SystemSettings: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                
-                <FormField
-                  control={form.control}
-                  name="maxAttemptsPerQuiz"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Maximum Quiz Attempts</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} min={1} max={10} />
-                      </FormControl>
-                      <FormDescription>
-                        The maximum number of times a student can attempt a quiz
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="initialLevelForNewUsers"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Initial Level for New Users</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} min={1} max={5} />
-                      </FormControl>
-                      <FormDescription>
-                        The starting level assigned to new users (before initial quiz)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
+        
                 <FormField
                   control={form.control}
                   name="practiceQuestionsPerLevel"

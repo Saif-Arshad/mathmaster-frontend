@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, Search, MoreHorizontal, Ban, Mail, Eye, RotateCw } from 'lucide-react';
+import axios from 'axios';
 
-// Sample data
 const sampleUsers = [
   {
     id: '1',
@@ -62,37 +62,102 @@ const sampleUsers = [
 const ManageUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [users, setUsers] = useState([])
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  const filteredUsers = sampleUsers.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+
+  const filteredUsers = users.filter(user =>
+    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
-  const handleActionClick = (userId: string, action: string) => {
+  const [sendEmailData, setSendEmail] = useState({
+    userEmail: "",
+    userMessage: "",
+    userSubject: "",
+
+  })
+  console.log("🚀 ~ sendEmailData:", sendEmailData)
+
+  const getAllUsers = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/admin/users`)
+      if (res.data) {
+        console.log(res.data)
+        setUsers(res.data)
+      }
+
+    } catch (error) {
+      console.log("🚀 ~ getAllUsers ~ error:", error)
+
+    }
+  }
+  useEffect(() => {
+    getAllUsers()
+  }, [])
+
+  const handleActionClick = async (userId: string, action: string) => {
     if (action === 'email') {
-      setSelectedUserId(userId);
+      setSendEmail({ ...sendEmailData, userEmail: userId ? filteredUsers.find(u => u.user_id === userId)?.email || '' : '' })
       setIsEmailDialogOpen(true);
     } else if (action === 'view') {
       navigate(`/admin/users/${userId}`);
-    } else if (action === 'reset') {
-      const user = sampleUsers.find(u => u.id === userId);
+    }
+    else if (action === 'block') {
+      const user = filteredUsers.find(u => u.user_id === userId);
+      const newStatus = !user.is_blocked ? 'blocked' : 'active';
+      if (user.is_blocked) {
+        const res = await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/admin/unblock-user/${user.user_id}`);
+        if (res.data) {
+       
+          toast({
+            title: newStatus === 'active' ? "User unblocked" : "User blocked",
+            description: `${user?.username} has been ${newStatus === 'active' ? 'unblocked' : 'blocked'} successfully.`,
+          });
+        }
+      } else {
+        const res = await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/admin/block-user/${user.user_id}`);
+        if (res.data) {
+          toast({
+            title: newStatus === 'active' ? "User unblocked" : "User blocked",
+            description: `${user?.username} has been ${newStatus === 'active' ? 'unblocked' : 'blocked'} successfully.`,
+          });
+        }
+      }
+
+    }
+  };
+  const sendEmail = async () => {
+    if (!sendEmailData.userEmail || !sendEmailData.userMessage || !sendEmailData.userSubject) {
       toast({
-        title: "Password reset",
-        description: `A password reset link has been sent to ${user?.email}.`,
+        title: "All Fields are required",
+        description: `Please fill Email Subject and message`,
       });
-    } else if (action === 'block') {
-      const user = sampleUsers.find(u => u.id === userId);
-      const newStatus = user?.status === 'active' ? 'blocked' : 'active';
+      return;
+    }
+
+    toast({
+      title: "Sending email...",
+      description: "Please wait while we send your email.",
+    });
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/admin/send-email`, sendEmailData);
+      if (res.data?.message) {
+        toast({
+          title: "Success",
+          description: res.data.message,
+        });
+        setIsEmailDialogOpen(false);
+      }
+    } catch (error) {
       toast({
-        title: newStatus === 'active' ? "User unblocked" : "User blocked",
-        description: `${user?.name} has been ${newStatus === 'active' ? 'unblocked' : 'blocked'} successfully.`,
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to send email. Please try again.",
       });
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
@@ -122,7 +187,7 @@ const ManageUsers: React.FC = () => {
             />
           </div>
         </div>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>User Accounts</CardTitle>
@@ -130,32 +195,36 @@ const ManageUsers: React.FC = () => {
           <CardContent>
             <div className="rounded-md border">
               <div className="grid grid-cols-12 bg-gray-100 p-3 text-sm font-medium">
-                <div className="col-span-3">Name</div>
+                <div className="col-span-3">User Name</div>
                 <div className="col-span-3">Email</div>
                 <div className="col-span-1">Age</div>
                 <div className="col-span-1">Level</div>
-                <div className="col-span-2">Status</div>
-                <div className="col-span-1">Quizzes</div>
+                <div className="col-span-1">Status</div>
+                <div className="col-span-1">Is Verified</div>
                 <div className="col-span-1 text-right">Actions</div>
               </div>
-              
+
               {filteredUsers.length > 0 ? (
                 <div className="divide-y">
                   {filteredUsers.map((user) => (
-                    <div 
-                      key={user.id} 
+                    <div
+                      key={user.user_id}
                       className="grid grid-cols-12 p-3 text-sm items-center"
                     >
-                      <div className="col-span-3 font-medium">{user.name}</div>
+                      <div className="col-span-3 font-medium capitalize">{user.username}</div>
                       <div className="col-span-3 text-gray-600">{user.email}</div>
                       <div className="col-span-1 text-gray-600">{user.age}</div>
-                      <div className="col-span-1 text-gray-600">{user.level}</div>
-                      <div className="col-span-2">
-                        <Badge className={user.status === 'active' ? 'bg-green-500' : 'bg-red-500'}>
-                          {user.status === 'active' ? 'Active' : 'Blocked'}
+                      <div className="col-span-1 text-gray-600">1</div>
+                      <div className="col-span-1">
+                        <Badge className={!user.is_blocked ? 'bg-green-500' : 'bg-red-500'}>
+                          {!user.is_blocked ? 'Active' : 'Blocked'}
                         </Badge>
                       </div>
-                      <div className="col-span-1 text-gray-600">{user.quizzesTaken}</div>
+                      <div className="col-span-1">
+                        <Badge className={!user.is_verified ? 'bg-green-500' : 'bg-red-500'}>
+                          {!user.is_verified ? 'Verified' : 'Not Verified'}
+                        </Badge>
+                      </div>
                       <div className="col-span-1 flex justify-end">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -164,21 +233,17 @@ const ManageUsers: React.FC = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleActionClick(user.id, 'view')}>
+                            <DropdownMenuItem onClick={() => handleActionClick(user.user_id, 'view')}>
                               <Eye className="mr-2 h-4 w-4" />
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleActionClick(user.id, 'email')}>
+                            <DropdownMenuItem onClick={() => handleActionClick(user.user_id, 'email')}>
                               <Mail className="mr-2 h-4 w-4" />
                               Send Email
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleActionClick(user.id, 'reset')}>
-                              <RotateCw className="mr-2 h-4 w-4" />
-                              Reset Password
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleActionClick(user.id, 'block')} className="text-red-500">
+                            <DropdownMenuItem onClick={() => handleActionClick(user.user_id, 'block')} className="text-red-500">
                               <Ban className="mr-2 h-4 w-4" />
-                              {user.status === 'active' ? 'Block User' : 'Unblock User'}
+                              {!user.is_blocked ? 'Block User' : 'Unblock User'}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -194,48 +259,60 @@ const ManageUsers: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Send Email</DialogTitle>
             </DialogHeader>
-            
+
             <form className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="recipient">To</Label>
-                <Input 
-                  id="recipient" 
-                  value={selectedUserId ? filteredUsers.find(u => u.id === selectedUserId)?.email || '' : ''} 
+                <Input
+                  id="recipient"
+                  value={sendEmailData.userEmail}
+                  onChange={(e) => {
+                    setSendEmail({ ...sendEmailData, userEmail: e.target.value })
+                  }}
                   readOnly
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="subject">Subject</Label>
-                <Input id="subject" placeholder="Email subject" />
+                <Input id="subject" placeholder="Email subject"
+                  value={sendEmailData.userSubject}
+                  onChange={(e) => {
+                    setSendEmail({ ...sendEmailData, userSubject: e.target.value })
+                  }}
+                />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="message">Message</Label>
-                <textarea 
-                  id="message" 
+                <textarea
+                  id="message"
+                  value={sendEmailData.userMessage}
+                  onChange={(e) => {
+                    setSendEmail({ ...sendEmailData, userMessage: e.target.value })
+                  }}
                   className="w-full min-h-[100px] p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-mathpath-purple"
                   placeholder="Your message here..."
                 />
               </div>
             </form>
-            
+
             <DialogFooter>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setIsEmailDialogOpen(false)}
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 className="bg-mathpath-purple hover:bg-purple-600"
-                onClick={() => setIsEmailDialogOpen(false)}
+                onClick={sendEmail}
               >
                 Send Email
               </Button>
