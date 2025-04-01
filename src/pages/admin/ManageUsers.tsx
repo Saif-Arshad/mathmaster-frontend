@@ -221,8 +221,8 @@ const ManageUsers: React.FC = () => {
                         </Badge>
                       </div>
                       <div className="col-span-1">
-                        <Badge className={!user.is_verified ? 'bg-green-500' : 'bg-red-500'}>
-                          {!user.is_verified ? 'Verified' : 'Not Verified'}
+                        <Badge className={user.is_verified ? 'bg-green-500' : 'bg-red-500'}>
+                          {user.is_verified ? 'Verified' : 'Not Verified'}
                         </Badge>
                       </div>
                       <div className="col-span-1 flex justify-end">

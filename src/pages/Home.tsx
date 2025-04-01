@@ -74,6 +74,9 @@ const Home: React.FC = () => {
       if (user.isAdmin == true) {
         navigate("/admin")
       }
+      if (user.completedQuiz != true) {
+        navigate("/initial-quiz")
+      }
       setProgress({
         ...mockProgress,
         currentLevel: user.level || 1

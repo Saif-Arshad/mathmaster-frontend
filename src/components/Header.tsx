@@ -15,7 +15,7 @@ const Header: React.FC = () => {
           <div className="bg-mathpath-purple text-white p-2 rounded-full">
             <Calculator size={20} />
           </div>
-          <span className="font-bold text-xl text-gray-900">MathPath</span>
+          <span className="font-bold text-xl text-gray-900">MathMaster</span>
         </Link>
 
         {isAuthenticated ? (
@@ -25,10 +25,7 @@ const Header: React.FC = () => {
                 <BookOpen size={18} />
                 <span>Home</span>
               </Link>
-              <Link to="/practice" className="text-gray-700 hover:text-mathpath-purple flex items-center gap-1">
-                <Brain size={18} />
-                <span>Practice</span>
-              </Link>
+             
             </nav>
             
             <div className="flex items-center gap-3">

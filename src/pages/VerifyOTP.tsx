@@ -50,7 +50,7 @@ const VerifyOTP: React.FC = () => {
         title: "Verification Successful",
         description: "Your account has been verified!",
       });
-      navigate('/login');
+      // navigate('/');
     }
   };
 
@@ -70,7 +70,7 @@ const VerifyOTP: React.FC = () => {
          
           <CardTitle className="text-2xl font-bold text-start">Verify Your Email</CardTitle>
           <CardDescription className="text-start">
-            We've sent a verification code to your 
+            We've sent a verification code to your email
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

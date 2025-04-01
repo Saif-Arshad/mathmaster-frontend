@@ -80,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, payload)
       console.log("🚀 ~ register ~ res:", res.data)
       if (res.data) {
+       
         localStorage.setItem("mathmaster_userID", JSON.stringify({
           id: res.data.user_id
         }))
@@ -111,12 +112,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/verify-otp`, { user_id: userId, code: otp })
       if (res.data) {
-        localStorage.setItem('mathmaster_user', JSON.stringify(res.data.user));
-        setUser(res.data.user);
+        console.log("🚀 ~ verifyOTP ~ res:", res.data)
+        const payload = {
+          ...res.data.user,
+          completedQuiz: false
+        }
+        localStorage.setItem('mathmaster_user', JSON.stringify(payload));
+        setUser(payload);
+        window.location.href = "/initial-quiz"
         setIsVerifying(false);
         setUnverifiedEmail(null);
         toast.success(res.data.message)
-        window.location.href = "/login"
 
       }
 
@@ -169,7 +175,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { password: _, ...userWithoutPassword } = res.data.user;
         const userData = {
           ...userWithoutPassword,
-          token: res.data.token
+          token: res.data.token,
+          completedQuiz: true,
         }
 
         localStorage.setItem('mathmaster_user', JSON.stringify(userData));
@@ -202,8 +209,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userData = {
           ...userWithoutPassword,
           token: res.data.token,
-          username:"admin",
-          isAdmin:true
+          username: "admin",
+          isAdmin: true
         }
 
         localStorage.setItem('mathmaster_user', JSON.stringify(userData));

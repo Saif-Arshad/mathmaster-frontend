@@ -202,24 +202,30 @@ const ManageInitialQuiz: React.FC = () => {
               <span className="text-2xl font-bold text-mathpath-purple">Manage Initial Quiz</span>
             </div>
             <div>
-              <Input
-                placeholder="Search questions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64"
-              />
+
             </div>
             <div>
-              <Button className="bg-mathpath-purple hover:bg-purple-600" onClick={openAddDialog}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Question
-              </Button>
+
             </div>
           </div>
         </div>
       </header>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6 flex flex-col sm:flex-row items-center justify-between">
+          <div className="relative w-full sm:w-96">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search questions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-64 pl-10"
+            />
+          </div>
+          <Button className="bg-mathpath-purple hover:bg-purple-600" onClick={openAddDialog}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Question
+          </Button>
+        </div>
         {loading ? (
           <p>Loading questions...</p>
         ) : (
@@ -275,7 +281,7 @@ const ManageInitialQuiz: React.FC = () => {
               <label htmlFor="question_text" className="text-sm font-medium">Question Text</label>
               <Input
                 id="question_text"
-                placeholder="e.g., How many apples are there?"
+                placeholder="e.g., 2+2 =?"
                 value={formData.question_text}
                 onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
               />
@@ -306,10 +312,10 @@ const ManageInitialQuiz: React.FC = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <label htmlFor="correct_option" className="text-sm font-medium">Correct Answer (e.g., A)</label>
+              <label htmlFor="correct_option" className="text-sm font-medium">Correct Answer (e.g., 10)</label>
               <Input
                 id="correct_option"
-                placeholder="e.g., A"
+                placeholder="e.g., 10"
                 value={formData.correct_option}
                 onChange={(e) => setFormData({ ...formData, correct_option: e.target.value })}
               />
@@ -365,7 +371,7 @@ const ManageInitialQuiz: React.FC = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <label htmlFor="edit-correct_option" className="text-sm font-medium">Correct Answer (e.g., A)</label>
+              <label htmlFor="edit-correct_option" className="text-sm font-medium">Correct Answer (e.g., 10)</label>
               <Input
                 id="edit-correct_option"
                 value={formData.correct_option}
