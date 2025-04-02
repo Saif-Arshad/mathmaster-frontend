@@ -27,6 +27,9 @@ import SystemSettings from "./pages/admin/SystemSettings";
 import QuizReports from "./pages/admin/QuizReports";
 import NewPassword from "./pages/NewPassword";
 import AdminLogin from "./pages/admin/AdminLogin";
+// New imports
+import Settings from "./pages/Settings";
+import Contact from "./pages/Contact";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -74,6 +77,16 @@ const App: React.FC = () => {
               <Route path="/" element={
                 <ProtectedRoute requireAuth={true}>
                   <Home />
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute requireAuth={true}>
+                  <Settings />
+                </ProtectedRoute>
+              } />
+              <Route path="/contact" element={
+                <ProtectedRoute requireAuth={true}>
+                  <Contact />
                 </ProtectedRoute>
               } />
               <Route path="/initial-quiz" element={
