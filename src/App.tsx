@@ -23,11 +23,9 @@ import ManageInitialQuiz from "./pages/admin/ManageInitialQuiz";
 import ManageLevels from "./pages/admin/ManageLevels";
 import ManageUsers from "./pages/admin/ManageUsers";
 import UserDetails from "./pages/admin/UserDetails";
-import SystemSettings from "./pages/admin/SystemSettings";
 import QuizReports from "./pages/admin/QuizReports";
 import NewPassword from "./pages/NewPassword";
 import AdminLogin from "./pages/admin/AdminLogin";
-// New imports
 import Settings from "./pages/Settings";
 import Contact from "./pages/Contact";
 
@@ -135,11 +133,7 @@ const App: React.FC = () => {
                   <UserDetails />
                 </ProtectedRoute>
               } />
-              <Route path="/admin/settings" element={
-                <ProtectedRoute requireAuth={true} requireAdmin={true}>
-                  <SystemSettings />
-                </ProtectedRoute>
-              } />
+            
               <Route path="/admin/reports" element={
                 <ProtectedRoute requireAuth={true} requireAdmin={true}>
                   <QuizReports />

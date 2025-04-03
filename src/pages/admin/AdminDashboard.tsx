@@ -36,7 +36,7 @@ const AdminDashboard: React.FC = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600 mt-2">
-            Manage your MathPath application
+            Manage your Math Master application
           </p>
         </div>
 
@@ -57,24 +57,6 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </Link>
-
-          <Link to="/admin/questions" className="block">
-            <Card className="h-full transition-all hover:shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BookOpen className="mr-2 h-5 w-5 text-mathpath-purple" />
-                  Manage Questions
-                </CardTitle>
-                <CardDescription>Add, edit or delete questions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500">
-                  Modify practice and quiz questions across all levels
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-
           <Link to="/admin/initial-quiz" className="block">
             <Card className="h-full transition-all hover:shadow-md">
               <CardHeader>
@@ -91,6 +73,9 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </Link>
+      
+
+       
 
           <Link to="/admin/levels" className="block">
             <Card className="h-full transition-all hover:shadow-md">
@@ -108,7 +93,22 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </Link>
-
+          <Link to="/admin/questions" className="block">
+            <Card className="h-full transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BookOpen className="mr-2 h-5 w-5 text-mathpath-purple" />
+                  Manage Questions
+                </CardTitle>
+                <CardDescription>Add, edit or delete questions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">
+                  Modify practice and quiz questions across all levels
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
           <Link to="/admin/reports" className="block">
             <Card className="h-full transition-all hover:shadow-md">
               <CardHeader>
@@ -126,25 +126,7 @@ const AdminDashboard: React.FC = () => {
             </Card>
           </Link>
 
-          <Link to="/admin/settings" className="block">
-            <Card className="h-full transition-all hover:shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Settings className="mr-2 h-5 w-5 text-mathpath-purple" />
-                  System Settings
-                </CardTitle>
-                <CardDescription>Configure system parameters</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500 mb-4">
-                  Adjust quiz passing percentages and other system settings
-                </p>
-                <Button className="w-full bg-mathpath-purple hover:bg-purple-600">
-                  Edit Settings
-                </Button>
-              </CardContent>
-            </Card>
-          </Link>
+      
         </div>
       </main>
     </div>

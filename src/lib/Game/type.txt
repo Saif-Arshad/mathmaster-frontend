@@ -1,0 +1,49 @@
+Type 1 : user will select the like the color up the apple 
+
+TYpe 1 {
+    type of Game :[sort,  color up ,basket game,box game ]
+    if(sort){
+        "WE will automatically shuffle the order"
+    type of shape : banana, apple , flower ,orange
+    number of total  : 
+    }
+    if(color Up){
+                type of shape : banana, apple , flower ,orange,ballone
+
+    how many color Up : 
+    number of total  : 
+    }
+    if(basket ame ){
+          type of shape : banana, apple , flower ,orange
+    how many left in the box : 
+    is shape in the box :true/false
+    number of total  : 
+    }
+    if(box game){
+          type of shape : banana, apple , flower ,orange
+          box 1 count =
+          box 2 count = 
+          final result count = 
+    }
+}
+
+Level 2 {
+    type of Game :[sort,  color up ,basket game ]
+       if(sort){
+        "WE will automatically shuffle the order"
+    type of shape : banana, apple , flower ,orange
+    number of total  : 
+    }
+        if(color Up){
+          type of shape : banana, apple , flower ,orange,ballone
+    how many color Up : 
+    number of total  : 
+    }
+       if(basket ame ){
+                   type of shape : banana, apple , flower ,orange,ballone
+
+    how many left in the box : 
+    number of total  : 
+    is shape in the box :true/false
+    }
+}

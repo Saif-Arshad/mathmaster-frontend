@@ -47,10 +47,10 @@ const Register: React.FC = () => {
     }
 
     const ageNum = parseInt(age);
-    if (isNaN(ageNum) || ageNum < 4 || ageNum > 12) {
-      setError('Age must be between 4 and 12');
-      return;
-    }
+    // if (isNaN(ageNum) || ageNum < 4 || ageNum > 12) {
+    //   setError('Age must be between 4 and 12');
+    //   return;
+    // }
 
     try {
       await register(email, username, password, ageNum);
