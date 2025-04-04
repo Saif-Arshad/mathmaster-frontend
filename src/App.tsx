@@ -28,6 +28,7 @@ import NewPassword from "./pages/NewPassword";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Settings from "./pages/Settings";
 import Contact from "./pages/Contact";
+import Game from "./lib/Game/Index";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -44,6 +45,11 @@ const App: React.FC = () => {
               <Route path="/login" element={
                 <ProtectedRoute requireUnauth={true}>
                   <Login />
+                </ProtectedRoute>
+              } />
+              <Route path="/game" element={
+                <ProtectedRoute requireUnauth={true}>
+                  <Game />
                 </ProtectedRoute>
               } />
               <Route path="/register" element={
