@@ -24,13 +24,11 @@ const InitialQuiz: React.FC = () => {
   const { user } = useAuth();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  /* auth redirects */
   useEffect(() => {
     if (user?.isAdmin) navigate("/admin");
     if (user?.completedQuiz) navigate("/");
   }, [user, navigate]);
 
-  /* fetch */
   useEffect(() => {
     (async () => {
       try {
@@ -44,7 +42,6 @@ const InitialQuiz: React.FC = () => {
     })();
   }, [backendUrl, toast]);
 
-  /* helpers */
   const setIsCorrect = (val: boolean) => {
     const id = questions[current].quiz_id;
     setCorrectFlags({ ...correctFlags, [id]: val });
@@ -84,7 +81,6 @@ const InitialQuiz: React.FC = () => {
     }
   };
 
-  /* loading states */
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
   if (!questions.length) return <div className="min-h-screen flex items-center justify-center">No questions.</div>;
 
@@ -93,7 +89,6 @@ const InitialQuiz: React.FC = () => {
   const answered = !!correctFlags[q.quiz_id];
   const last = current === questions.length - 1;
 
-  /* render game by type */
   const renderGame = () => {
     switch (q.game) {
       case "Color Up Game":

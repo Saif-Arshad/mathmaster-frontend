@@ -78,11 +78,7 @@ const App: React.FC = () => {
                   <Home />
                 </ProtectedRoute>
               } />
-              <Route path="/settings" element={
-                <ProtectedRoute requireAuth={true}>
-                  <Settings />
-                </ProtectedRoute>
-              } />
+         
               <Route path="/contact" element={
                 <ProtectedRoute requireAuth={true}>
                   <Contact />
