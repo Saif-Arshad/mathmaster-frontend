@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -12,11 +13,6 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
 
 interface Sublevel { sublevel_id: number; sublevel_discription: string; }
 interface Level { level_id: number; level_name: string; sublevels: Sublevel[]; }
-
-const BUBBLE = 96;            // px diameter for level bubble
-const SUB_BUBBLE = 72;        // px diameter for sub‑level bubble
-const GAP_X = 220;            // horizontal gap between levels
-const GAP_Y = 140;            // vertical distance from level to its sub‑levels
 
 const Home: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -43,9 +39,6 @@ const Home: React.FC = () => {
     })();
   }, []);
 
-  const levelColor = (i: number) => ['bg-pink-500', 'bg-yellow-400', 'bg-sky-400'][i % 3];
-  const levelText = (i: number) => (i === 1 ? 'text-black' : 'text-white');
-
   if (loading) return <div className="min-h-screen flex items-center justify-center text-xl">Loading…</div>;
 
   return (
@@ -55,48 +48,57 @@ const Home: React.FC = () => {
       <main className="ml-64 pt-8 px-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-12">Home</h1>
 
-        <div className="overflow-x-auto pb-24">
-          <div className="relative h-[260px] w-max pl-10 pr-40">{/* timeline container */}
-            {levels.map((lvl, lIdx) => {
-              const x = lIdx * GAP_X;
-              const color = levelColor(lIdx);
-              const txt = levelText(lIdx);
-
-              return (
-                <div key={lvl.level_id} className="absolute top-[160px]" style={{ left: x }}>
-                  <div className={`${color} ${txt} w-[${BUBBLE}px] h-[${BUBBLE}px] rounded-full flex items-center justify-center font-bold shadow-lg`}>
-                    {lvl.level_name}
+        <div className="relative overflow-x-auto pb-24">
+          {/* Level progression visualization */}
+          <div className="learning-path min-h-[400px] w-full px-6 relative">
+            {levels.map((level, i) => (
+              <div key={level.level_id} className="level-container relative">
+                {/* Level bubble */}
+                <div 
+                  className={`level-bubble absolute ${i % 2 === 0 ? 'right-10' : 'left-10'} ${i === 0 ? 'bottom-0' : ''}`}
+                  style={{
+                    bottom: `${i * 80}px`,
+                    transform: i % 2 === 0 ? 'translateX(-30px)' : 'translateX(30px)',
+                  }}
+                >
+                  <div className={`${i % 2 === 0 ? 'bg-pink-500' : 'bg-yellow-400'} text-white font-bold px-6 py-3 rounded-lg shadow-lg`}>
+                    {level.level_name}
                   </div>
-                  {lvl.sublevels.map((sub, sIdx) => {
-                    const subX = x + (sIdx + 1) * (SUB_BUBBLE + 40);
-                    const subY = 0;
-                    const levelCenterX = x + BUBBLE / 2;
-                    const levelCenterY = 160 + BUBBLE / 2;
-                    const subCenterX = subX + SUB_BUBBLE / 2;
-                    const subCenterY = subY + SUB_BUBBLE / 2;
-
-                    // SVG quadratic curve path
-                    const path = `M${levelCenterX},${levelCenterY} Q${levelCenterX},${subCenterY} ${subCenterX},${subCenterY}`;
-
-                    return (
-                      <React.Fragment key={sub.sublevel_id}>
-                        {/* curve */}
-                        <svg className="absolute pointer-events-none" style={{ left: 0, top: 0 }} width={subCenterX} height={levelCenterY}>
-                          <path d={path} strokeWidth={4} stroke={color.replace('bg-', '').replace('-500', '') || '#000'} fill="none" />
-                        </svg>
-                        {/* sub‑bubble */}
-                        <div className={`absolute ${color} ${txt} w-[${SUB_BUBBLE}px] h-[${SUB_BUBBLE}px] rounded-full flex items-center justify-center font-semibold shadow`} style={{ left: subX, top: subY }}>
-                          {`Sub ${sIdx + 1}`}
+                  
+                  {/* Sublevels */}
+                  {level.sublevels.map((sublevel, j) => (
+                    <div 
+                      key={sublevel.sublevel_id}
+                      className="sublevel-bubble absolute"
+                      style={{
+                        left: i % 2 === 0 ? `-${180 + j * 20}px` : `${100 + j * 20}px`,
+                        bottom: `${50 + j * 70}px`,
+                        zIndex: level.sublevels.length - j,
+                      }}
+                    >
+                      <div className="relative">
+                        {/* Connector line */}
+                        <div 
+                          className={`absolute ${i % 2 === 0 ? 'right-full' : 'left-full'} top-1/2 h-1 ${i % 2 === 0 ? 'bg-pink-400' : 'bg-yellow-500'}`} 
+                          style={{ 
+                            width: `${40 + j * 5}px`,
+                            transform: 'translateY(-50%)'
+                          }}
+                        ></div>
+                        
+                        {/* Sublevel circle */}
+                        <div className="relative z-10 bg-yellow-300 w-16 h-16 rounded-full flex items-center justify-center font-bold text-black shadow-md">
+                          Sublevel {j + 1}
                         </div>
-                      </React.Fragment>
-                    );
-                  })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
+              </div>
+            ))}
 
-            {/* Continue button fixed to the right */}
-            <div className="absolute top-1/2 right-0 -translate-y-1/2 pr-10">
+            {/* Continue Practice Button */}
+            <div className="absolute bottom-0 right-0 mb-10">
               <Link to="/practice">
                 <Button className="bg-mathpath-purple hover:bg-purple-700 text-white px-6 py-2 rounded-full flex items-center gap-2 text-lg shadow-lg">
                   Continue Practice
