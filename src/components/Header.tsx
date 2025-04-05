@@ -46,8 +46,8 @@ const Header: React.FC = () => {
         <h2 className="text-xl font-bold">Hi, {user?.username}</h2>
         <div className="mt-4 bg-white/10 p-4 rounded-xl">
           <div className="text-sm mb-2">Level Progress:</div>
-          <Progress value={30} className="bg-white/20 h-2" />
-          <div className="text-right text-sm mt-1">30%</div>
+          <Progress value={0} className="bg-white/20 h-2" />
+          <div className="text-right text-sm mt-1">0%</div>
         </div>
       </div>
       
