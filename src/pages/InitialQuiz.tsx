@@ -33,6 +33,9 @@ const InitialQuiz: React.FC = () => {
 
   // Redirect if the user already completed the quiz
   useEffect(() => {
+    if (user.isAdmin === true) {
+      navigate("/admin");
+    }
     if (user?.completedQuiz) {
       navigate('/');
     }
@@ -45,7 +48,7 @@ const InitialQuiz: React.FC = () => {
       const res = await axios.get(`${backendUrl}/initial-quiz`);
       setQuestions(res.data);
       setCurrentQuestion(0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast({
         title: "Error",
@@ -80,7 +83,7 @@ const InitialQuiz: React.FC = () => {
     }
   };
 
-  const handleSubmitQuiz = async() => {
+  const handleSubmitQuiz = async () => {
     setIsSubmitting(true);
 
     // Simple scoring: count questions where the selected answer matches the correct answer
@@ -101,7 +104,7 @@ const InitialQuiz: React.FC = () => {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       try {
-        const payload={
+        const payload = {
           user_id: parsedUser.user_id,
           percentage: Math.round(percentage)
         }
@@ -109,7 +112,7 @@ const InitialQuiz: React.FC = () => {
 
       } catch (error) {
         console.log("🚀 ~ handleSubmitQuiz ~ error:", error)
-        
+
       }
       const updatedUser = {
         ...parsedUser,
@@ -119,13 +122,13 @@ const InitialQuiz: React.FC = () => {
       localStorage.setItem('mathmaster_user', JSON.stringify(updatedUser));
     }
 
-      toast({
-        title: "Assessment Completed!",
-        description: `Your score is ${Math.round(percentage)}%.`,
-      });
-      setIsSubmitting(false);
-      window.location.href='/'
-    }
+    toast({
+      title: "Assessment Completed!",
+      description: `Your score is ${Math.round(percentage)}%.`,
+    });
+    setIsSubmitting(false);
+    window.location.href = '/'
+  }
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -188,8 +191,8 @@ const InitialQuiz: React.FC = () => {
                 <div
                   key={index}
                   className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedAnswers[currentQuestionData.quiz_id] === option
-                      ? "border-mathpath-purple bg-mathpath-lightPurple"
-                      : "border-gray-200 hover:border-mathpath-purple"
+                    ? "border-mathpath-purple bg-mathpath-lightPurple"
+                    : "border-gray-200 hover:border-mathpath-purple"
                     }`}
                   onClick={() => handleSelectAnswer(currentQuestionData.quiz_id, option)}
                 >
