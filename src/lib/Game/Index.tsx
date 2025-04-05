@@ -1,13 +1,23 @@
+
 import React from 'react'
-import BoxGame from './BoxGame.js'
-import SortGame from './SortGame.js'
-import ColorUpGame from './ColorUpGame.js'
-import EquationGame from './DivisionGame.js'
+import { BoxGame } from './BoxGame'
+import { SortGame } from './SortGame'
+import { ColorUpGame } from './ColorUpGame'
+import EquationGame from './DivisionGame'
+
 function Game() {
     return (
         <>
-            <EquationGame />
-    </>
+            <EquationGame 
+                shape="apple"
+                operand1={3}
+                operand2={2}
+                operation="+"
+                result={5}
+                isCorrect={false}
+                setIsCorrect={() => {}}
+            />
+        </>
     )
 }
 
