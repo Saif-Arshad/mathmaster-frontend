@@ -10,6 +10,7 @@ type User = {
   age: number;
   level: number;
   completedQuiz: boolean;
+  token: any;
   isAdmin?: boolean;
 };
 
@@ -118,6 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log("🚀 ~ verifyOTP ~ res:", res.data)
         const payload = {
           ...res.data.user,
+          token:res.data.token,
           completedQuiz: false
         }
         localStorage.setItem('mathmaster_user', JSON.stringify(payload));

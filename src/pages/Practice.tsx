@@ -62,14 +62,18 @@ const HINT = {
 const Practice: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [current, setCurrent] = useState(0);
+  // answeredFlags stores whether a question was answered (true if correct, false if skipped/wrong)
   const [answeredFlags, setAnsweredFlags] = useState<Record<number, boolean>>({});
   const [showHint, setShowHint] = useState(false);
+  const [showLevelUpModal, setShowLevelUpModal] = useState(false);
   const [showCongrats, setShowCongrats] = useState(false);
+  // const [isLevelUpQuestion,setIslevelUp] = useState(false);
 
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -89,7 +93,7 @@ const Practice: React.FC = () => {
           ...q,
           questionId: q.question_id,
           question: q.question_text,
-          gameType: q.game, 
+          gameType: q.game,
           difficulty: q.difficulty ?? 1,
           sortOrder: q.sortOrder ?? q.sort_order ?? 0,
         }));
@@ -107,17 +111,40 @@ const Practice: React.FC = () => {
     })();
   }, [backendUrl, isAuthenticated, navigate, toast, user]);
 
-
   const q = questions[current];
-  const totalAnswered = Object.keys(answeredFlags).length;
   const correctCount = Object.values(answeredFlags).filter(Boolean).length;
+  const isLevelUpQuestion = q &&
+    (q.questionId in answeredFlags) &&
+    answeredFlags[q.questionId] === true &&
+    correctCount > 0 &&
+    correctCount % 5 === 0;
+  const totalAnswered = Object.keys(answeredFlags).length;
 
   const setIsCorrect = (val: boolean) => {
     setAnsweredFlags((prev) => ({ ...prev, [q.questionId]: val }));
     if (current === questions.length - 1 && val) setShowCongrats(true);
   };
+
   const next = () => setCurrent((p) => p + 1);
   const prev = () => setCurrent((p) => p - 1);
+
+  const skipQuestion = () => {
+    setAnsweredFlags((prev) => ({ ...prev, [q.questionId]: false }));
+    if (current < questions.length - 1) setCurrent((p) => p + 1);
+  };
+
+
+
+
+  const handleSubmit = () => {
+    setShowLevelUpModal(true);
+  };
+
+  const continueLevelUp = () => {
+
+    setShowLevelUpModal(false);
+    if (current < questions.length - 1) next();
+  };
 
   const renderGame = () => {
     switch (q.gameType) {
@@ -127,7 +154,7 @@ const Practice: React.FC = () => {
             shape={q.colorUp_shape as any}
             totalItems={q.colorUp_totalItem!}
             colorCount={q.colorUp_coloredCount!}
-            isCorrect={!!answeredFlags[q.questionId]}
+            isCorrect={q.questionId in answeredFlags ? !!answeredFlags[q.questionId] : false}
             setIsCorrect={setIsCorrect}
           />
         );
@@ -137,7 +164,7 @@ const Practice: React.FC = () => {
             shape={q.sort_shape as any}
             totalItem={q.sort_totalItem!}
             order={q.sort_order as any}
-            isCorrect={!!answeredFlags[q.questionId]}
+            isCorrect={q.questionId in answeredFlags ? !!answeredFlags[q.questionId] : false}
             setIsCorrect={setIsCorrect}
           />
         );
@@ -147,7 +174,7 @@ const Practice: React.FC = () => {
             shape={q.box_shape as any}
             startInBox={q.box_firstBoxCount!}
             targetInBox={q.box_secondBoxCount!}
-            isCorrect={!!answeredFlags[q.questionId]}
+            isCorrect={q.questionId in answeredFlags ? !!answeredFlags[q.questionId] : false}
             setIsCorrect={setIsCorrect}
           />
         );
@@ -159,7 +186,7 @@ const Practice: React.FC = () => {
             operand2={q.equation_secondBoxCount!}
             operation={q.equation_operation as "+" | "-" | "*"}
             result={q.equation_finalBoxcount!}
-            isCorrect={!!answeredFlags[q.questionId]}
+            isCorrect={q.questionId in answeredFlags ? !!answeredFlags[q.questionId] : false}
             setIsCorrect={setIsCorrect}
           />
         );
@@ -168,67 +195,94 @@ const Practice: React.FC = () => {
     }
   };
 
-  if (!questions.length)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading…
-      </div>
-    );
 
   return (
     <div className="min-h-screen bg-sky-100">
       <Header />
+      {
+        !questions.length ?
+          <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="text-center">
+              <div className="animate-pulse">
+                <div className="w-16 h-16 mx-auto bg-mathpath-purple rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-xl font-medium text-gray-700">Fetching Questions...</h2>
+            </div>
+          </div>
+          :
 
-      <main className="ml-64 py-8 px-12 max-w-4xl mx-auto space-y-6">
-        <div className="flex justify-between text-sm mb-4">
-          <span>
-            <h2 className="font-semibold text-xl">Practice</h2>
-            <p>
-              {q.level.level_name} – SubLevel {Math.floor(correctCount / 5 == 0 ? 1 : correctCount / 5)}
-            </p>
-          </span>
-          <span>
-            {correctCount} correct out of {totalAnswered} answered
-          </span>
-        </div>
-
-        <Card>
-          <CardContent className="p-6 pb-20 space-y-6">
-            <div className="flex justify-end ">
-
-              <Button
-                variant="outline"
-                onClick={() => setShowHint(true)}
-                className="text-mathpath-purple border-mathpath-purple hover:bg-mathpath-lightPurple"
-              >
-
-                <Lightbulb className=" h-5 w-5" />
-                Hint
-              </Button>
+          <main className="ml-64 py-8 px-12 max-w-4xl mx-auto space-y-6">
+            <div className="flex justify-between text-sm mb-4">
+              <span>
+                <h2 className="font-semibold text-xl">Practice</h2>
+                {/* Updated sub-level calculation */}
+                <p>
+                  {q.level.level_name} – SubLevel {Math.floor(correctCount / 5) + 1}
+                </p>
+              </span>
+              <span>
+                {correctCount} correct out of {totalAnswered} answered
+              </span>
             </div>
 
-            <h2 className="text-xl font-semibold text-start capitalize">{q.question}</h2>
-            {renderGame()}
-          </CardContent>
-        </Card>
+            <Card>
+              <CardContent className="p-6 pb-20 space-y-6">
+                <div className="flex justify-end ">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowHint(true)}
+                    className="text-mathpath-purple border-mathpath-purple hover:bg-mathpath-lightPurple"
+                  >
+                    <Lightbulb className="h-5 w-5" />
+                    Hint
+                  </Button>
+                </div>
 
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={prev} disabled={current === 0}>
-            Previous
-          </Button>
+                <h2 className="text-xl font-semibold text-start capitalize">{q.question}</h2>
+                {renderGame()}
+              </CardContent>
+            </Card>
 
-          <div className="flex gap-2">
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={prev} disabled={current === 0}>
+                Previous
+              </Button>
 
-            <Button
-              onClick={next}
-              disabled={!answeredFlags[q.questionId] || current === questions.length - 1}
-              className="bg-mathpath-purple hover:bg-purple-600"
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </main>
+              <div className="flex gap-2">
+                {/* New Skip button */}
+                <Button
+                  onClick={skipQuestion}
+                  disabled={current === questions.length - 1}
+                  variant="outline"
+                  className="bg-gray-300 hover:bg-gray-400"
+                >
+                  Skip
+                </Button>
+                {isLevelUpQuestion ? (
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!(q.questionId in answeredFlags)}
+                    className="bg-mathpath-purple hover:bg-purple-600"
+                  >
+                    Submit
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={next}
+                    disabled={!(q.questionId in answeredFlags) || current === questions.length - 1}
+                    className="bg-mathpath-purple hover:bg-purple-600"
+                  >
+                    Next
+                  </Button>
+                )}
+              </div>
+            </div>
+          </main>
+      }
 
       <Dialog open={showHint} onOpenChange={setShowHint}>
         <DialogContent className="sm:max-w-md">
@@ -257,6 +311,25 @@ const Practice: React.FC = () => {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={showLevelUpModal} onOpenChange={setShowLevelUpModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Great Job!</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <Trophy className="h-12 w-12 text-yellow-500" />
+            <p className="text-center">
+              Congratulations, you cleared this level! Continue to level up.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={continueLevelUp} className="bg-mathpath-purple hover:bg-purple-600">
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showCongrats} onOpenChange={setShowCongrats}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -270,7 +343,7 @@ const Practice: React.FC = () => {
           </div>
           <DialogFooter>
             <Button onClick={() => setShowCongrats(false)} className="bg-mathpath-purple hover:bg-purple-600">
-              Continue
+              Continue for Quiz
             </Button>
           </DialogFooter>
         </DialogContent>
