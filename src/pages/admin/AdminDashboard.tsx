@@ -109,22 +109,7 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </Link>
-          <Link to="/admin/reports" className="block">
-            <Card className="h-full transition-all hover:shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart className="mr-2 h-5 w-5 text-mathpath-purple" />
-                  Quiz Reports
-                </CardTitle>
-                <CardDescription>View student performance data</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500">
-                  Generate and analyze student progress and quiz results
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
+        
 
       
         </div>
