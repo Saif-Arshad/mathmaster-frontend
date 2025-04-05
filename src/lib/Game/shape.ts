@@ -1,6 +1,6 @@
 export const shapes = {
-    guava: {
-        uncolored: `
+  guava: {
+    uncolored: `
       <svg class="guava" height="100px" width="100px" viewBox="0 0 512 512" xml:space="preserve">
         <g>
           <path fill="green" d="M346.766,80.68c23.36-23.36,32.464-54.312,25.41-78.35c-24.046-7.054-54.997,2.042-78.358,25.402
@@ -24,9 +24,9 @@ export const shapes = {
         </g>
       </svg>
     `
-    },
-    carrot: {
-        uncolored: `
+  },
+  carrot: {
+    uncolored: `
       <svg class="apple" height="100px" width="100px" viewBox="0 0 512 512" xml:space="preserve">
         <g>
           <path class="apple-body" fill="gray" d="M283.356,252.949l-27.357-20.07l-27.352-20.071c-10.318-7.574-29.321-15.282-49.585-7.073
@@ -47,9 +47,9 @@ export const shapes = {
         </g>
       </svg>
     `
-    },
-    orange: {
-        uncolored: `
+  },
+  orange: {
+    uncolored: `
       <svg width="150" height="150" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
         <g>
           <!-- Leaf -->
@@ -67,9 +67,9 @@ export const shapes = {
         </g>
       </svg>
     `
-    },
-    apple: {
-        uncolored: `
+  },
+  apple: {
+    uncolored: `
       <svg class="apple" width="120" height="120" viewBox="0 0 950.458 950.458">
         <g>
           <path fill="#4CAF50"
@@ -93,12 +93,19 @@ export const shapes = {
         </g>
       </svg>
     `
-    }
+  },
+  banana: {
+    uncolored: `
+    <svg width="100px" height="100px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <path fill="gray" d="M465.937 122.204V36.703l41.688-1.642V1.43H377.099v35.272h43.328c0 0 7.329 33.772 0 74.191-18.788 103.608-140.68 222.48-271.851 255.432-69.594 17.482-122.228 13.417-122.228 13.417-10.107-2.694-20.635 2.49-24.662 12.13-4.019 9.641-.28 20.952 5.156 33.875 0 0 24.54 68.466 150.032 82.126 165.296 17.985 299.318-54.062 345.389-213.809 30.847-102.354-9.694-175.613-33.918-175.613z"/>
+    </svg>`
+  }
 };
 
 export const shapeColors = {
-    guava: '#90EE90',    
-    carrot: '#FF7F50',    
-    orange: '#FFA500',   
-    apple: '#FF0000'     
+  guava: '#90EE90',
+  carrot: '#FF7F50',
+  orange: '#FFA500',
+  apple: '#FF0000',
+  banana: '#FFE135'
 };

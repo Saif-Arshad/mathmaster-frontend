@@ -1,106 +1,89 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { shapes, shapeColors } from "./shape";
 
-// Function to get colored SVG
-const getColoredSVG = (svgString, shape) => {
-  const fillColor = shapeColors[shape];
-  let regex;
-  if (shape === "orange") {
-    regex = /fill="#CCCCCC"/g;
-  } else {
-    regex = /fill="gray"/g;
-  }
-  return svgString.replace(regex, `fill="${fillColor}"`);
+const getColoredSVG = (svg: string, shape: string) => {
+  const fill = shapeColors[shape];
+  const regex = shape === "orange" ? /fill="#CCCCCC"/g : /fill="gray"/g;
+  return svg.replace(regex, `fill="${fill}"`);
 };
 
-const SortGame = ({
-  shape = "orange",
-  numbersToSort = [4, 2, 3],
-  instruction = "Sort the numbers from smallest to largest",
-}) => {
-  // Shuffle numbers on component mount
-  const [items, setItems] = useState(() => {
-    const shuffledNumbers = [...numbersToSort].sort(() => Math.random() - 0.5);
-    return shuffledNumbers.map((num, idx) => ({ id: `item-${idx}`, number: num }));
-  });
-  const [isCorrect, setIsCorrect] = useState(false);
+type Props = {
+  shape: keyof typeof shapes;
+  totalItem: number;
+  order: "asc" | "desc";
+  isCorrect: boolean;
+  setIsCorrect: (v: boolean) => void;
+};
 
-  const onDragEnd = (result) => {
+export const SortGame: React.FC<Props> = ({ shape, totalItem, order, isCorrect, setIsCorrect }) => {
+  /* generate & shuffle list */
+  const make = (n: number) =>
+    Array.from({ length: n }, (_, i) => i + 1)
+      .sort(() => Math.random() - 0.5)
+      .map((num, i) => ({ id: `num-${i}`, number: num }));
+
+  const [items, setItems] = useState(() => make(totalItem));
+
+  useEffect(() => {
+    setItems(make(totalItem));
+    setIsCorrect(false);
+  }, [totalItem]);
+
+  const onDragEnd = (result: any) => {
     if (!result.destination) return;
+    const arr = Array.from(items);
+    const [moved] = arr.splice(result.source.index, 1);
+    arr.splice(result.destination.index, 0, moved);
+    setItems(arr);
 
-    const newItems = Array.from(items);
-    const [reorderedItem] = newItems.splice(result.source.index, 1);
-    newItems.splice(result.destination.index, 0, reorderedItem);
-    setItems(newItems);
-
-    // Check if sorted in ascending order (allowing duplicates)
-    const sorted = newItems.every(
-      (item, idx, arr) => idx === 0 || item.number >= arr[idx - 1].number
-    );
+    const sorted = arr.every((it, idx) => idx === 0 || (order === "asc" ? it.number >= arr[idx - 1].number : it.number <= arr[idx - 1].number));
     setIsCorrect(sorted);
   };
 
   return (
-    <div className="flex flex-col items-center p-6 max-w-xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">{instruction}</h2>
-
+    <div className="flex flex-col items-center p-6">
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="sort" direction="horizontal">
-          {(provided) => (
-            <div
-              className="flex space-x-4"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {items.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
-                  {(provided) => (
+          {(p) => (
+            <div ref={p.innerRef} {...p.droppableProps} className="flex space-x-4">
+              {items.map((it, idx) => (
+                <Draggable key={it.id} draggableId={it.id} index={idx}>
+                  {(p, snap) => (
                     <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className="relative w-32 h-32 flex items-center justify-center"
-                      style={{
-                        ...provided.draggableProps.style,
-                        zIndex: provided.isDragging ? 100 : 1, // Higher z-index when dragging
-                      }}
+                      ref={p.innerRef}
+                      {...p.draggableProps}
+                      {...p.dragHandleProps}
+                      style={{ ...p.draggableProps.style, zIndex: snap.isDragging ? 100 : 1 }}
+                      className="flex flex-col items-center"
                     >
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        dangerouslySetInnerHTML={{
-                          __html: isCorrect
-                            ? getColoredSVG(shapes[shape].uncolored, shape)
-                            : shapes[shape].uncolored,
-                        }}
-                      />
-                      <span
-                        className="absolute text-md font-bold text-gray-100 pointer-events-none"
-                        style={{
-                          top: "70%",
-                          left: "60%",
-                          transform: "translate(-50%, -50%)",
-                        }}
-                      >
-                        {item.number}
-                      </span>
+                      {/* shape */}
+                      <>
+
+                        <div
+                          className="w-28 h-28 pointer-events-none"
+                          dangerouslySetInnerHTML={{
+                            __html: isCorrect
+                              ? getColoredSVG(shapes[shape].uncolored, shape)
+                              : shapes[shape].uncolored,
+                          }}
+                        />
+
+                        <div className="h-7 w-7 p-1 mt-12  bg-mathpath-purple rounded-full ml-10 flex items-center justify-center">
+                          <span className="font-bold text-white">{it.number}</span>
+                        </div>
+                      </>
                     </div>
                   )}
                 </Draggable>
+
               ))}
-              <div style={{ visibility: "hidden" }}>{provided.placeholder}</div>
+              {p.placeholder}
             </div>
           )}
         </Droppable>
       </DragDropContext>
-
-      {isCorrect && (
-        <button className="mt-12 px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition">
-          Next
-        </button>
-      )}
     </div>
   );
 };
-
-export default SortGame;

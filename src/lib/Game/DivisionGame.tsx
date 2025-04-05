@@ -1,187 +1,168 @@
-import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useMemo } from "react";
+import {
+    DragDropContext,
+    Droppable,
+    Draggable,
+    DropResult,
+} from "react-beautiful-dnd";
 import { shapes, shapeColors } from "./shape";
 
-function getShapeSvg(shapeKey, wantColored = true) {
-    const shapeEntry = shapes[shapeKey];
-    if (!shapeEntry) return "";
-    let svgString = shapeEntry.uncolored;
-    if (wantColored) {
-        const color = shapeColors[shapeKey] || "#CCCCCC";
-        svgString = svgString.replace(/fill="gray"/g, `fill="${color}"`);
-    }
-    return svgString;
-}
 
-const getSizedSVG = (svgString, size) => {
-    let updated = svgString.replace(/width="[^"]+"/, `width="${size}px"`);
-    updated = updated.replace(/height="[^"]+"/, `height="${size}px"`);
-    return updated;
+const colorSvg = (svg: string, shape: string, size: number) => {
+    const fill = shapeColors[shape];
+    return svg
+        .replace(/fill="gray"/g, `fill="${fill}"`)
+        .replace(/fill="#CCCCCC"/g, `fill="${fill}"`)
+        .replace(/fill="#A5A5A5"/g, `fill="${fill}"`)
+        .replace(/width="[^"]+"/, `width="${size}px"`)
+        .replace(/height="[^"]+"/, `height="${size}px"`);
 };
 
-function neededCount(operand1, operation, result) {
-    switch (operation) {
-        case "+": return result - operand1;
-        case "-": return operand1 - result;
+const graySvg = (svg: string, size: number) =>
+    svg
+        .replace(/width="[^"]+"/, `width="${size}px"`)
+        .replace(/height="[^"]+"/, `height="${size}px"`);
+
+
+const needSecondBox = (op1: number, op: string, res: number) => {
+    switch (op) {
+        case "+":
+            return res - op1;
+        case "-":
+            return op1 - res;
         case "*":
-        case "×": return operand1 === 0 ? 0 : result / operand1;
-        case "/":
-        case "÷": return result === 0 ? 0 : operand1 / result;
-        default: return 0;
+            return op1 === 0 ? 0 : res / op1;
+        default:
+            return 0;
     }
-}
+};
 
-const EquationGame = ({
-    shape = "apple",
-    operand1 = 3,
-    operation = "+",
-    result = 7,
-    totalItemsInSource = 10,
-    question = "Add items in the second bucket until we reach the final result",
+type Props = {
+    shape: keyof typeof shapes;
+    operand1: number;
+    operand2: number;
+    operation: "+" | "-" | "*";
+    result: number;
+    isCorrect: boolean;
+    setIsCorrect: (v: boolean) => void;
+    shapeSize?: number; // <‑‑ NEW
+};
+
+const EquationGame: React.FC<Props> = ({
+    shape,
+    operand1,
+    operand2,
+    operation,
+    result,
+    isCorrect,
+    setIsCorrect,
+    shapeSize = 48,
 }) => {
-    const validShape = shapes[shape] ? shape : "apple";
-    const [sourceItems, setSourceItems] = useState(
-        Array.from({ length: totalItemsInSource }, (_, i) => ({ id: `src-${i}` }))
+  
+    const [box2, setBox2] = useState<Array<{ id: string }>>([]);
+    const [source, setSrc] = useState(
+        Array.from({ length: operand2 }, (_, i) => ({ id: `src-${i}` }))
     );
-    const [secondBoxItems, setSecondBoxItems] = useState([]);
-    const [isCorrect, setIsCorrect] = useState(false);
 
-    const onDragEnd = (result) => {
-        const { source, destination } = result;
-        if (!destination) return;
+    const goal = needSecondBox(operand1, operation, result);
 
-        const sourceId = source.droppableId;
-        const destId = destination.droppableId;
+    const baseSvg = useMemo(
+        () => graySvg(shapes[shape].uncolored, shapeSize),
+        [shape, shapeSize]
+    );
+    const filledSvg = useMemo(
+        () => colorSvg(shapes[shape].uncolored, shape, shapeSize),
+        [shape, shapeSize]
+    );
 
-        if (sourceId === destId) {
-            if (sourceId === "source") {
-                const newItems = Array.from(sourceItems);
-                const [moved] = newItems.splice(source.index, 1);
-                newItems.splice(destination.index, 0, moved);
-                setSourceItems(newItems);
-            } else {
-                const newItems = Array.from(secondBoxItems);
-                const [moved] = newItems.splice(source.index, 1);
-                newItems.splice(destination.index, 0, moved);
-                setSecondBoxItems(newItems);
-            }
+    const move = (
+        src: any[],
+        dst: any[],
+        sIdx: number,
+        dIdx: number
+    ): { cloneS: any[]; cloneD: any[] } => {
+        const cloneS = Array.from(src);
+        const cloneD = Array.from(dst);
+        const [itm] = cloneS.splice(sIdx, 1);
+        cloneD.splice(dIdx, 0, itm);
+        return { cloneS, cloneD };
+    };
+
+    const onDragEnd = (r: DropResult) => {
+        if (!r.destination) return;
+        const { source: s, destination: d } = r;
+        if (s.droppableId === d.droppableId) return;
+
+        if (s.droppableId === "src") {
+            const { cloneS, cloneD } = move(source, box2, s.index, d.index);
+            setSrc(cloneS);
+            setBox2(cloneD);
+            setIsCorrect(cloneD.length === goal);
         } else {
-            if (sourceId === "source" && destId === "box2") {
-                const newSource = Array.from(sourceItems);
-                const newBox2 = Array.from(secondBoxItems);
-                const [moved] = newSource.splice(source.index, 1);
-                newBox2.splice(destination.index, 0, moved);
-                setSourceItems(newSource);
-                setSecondBoxItems(newBox2);
-                const needed = neededCount(operand1, operation, result);
-                setIsCorrect(newBox2.length === needed);
-            } else if (sourceId === "box2" && destId === "source") {
-                const newSource = Array.from(sourceItems);
-                const newBox2 = Array.from(secondBoxItems);
-                const [moved] = newBox2.splice(source.index, 1);
-                newSource.splice(destination.index, 0, moved);
-                setSourceItems(newSource);
-                setSecondBoxItems(newBox2);
-                const needed = neededCount(operand1, operation, result);
-                setIsCorrect(newBox2.length === needed);
-            }
+            const { cloneS, cloneD } = move(box2, source, s.index, d.index);
+            setBox2(cloneS);
+            setSrc(cloneD);
+            setIsCorrect(cloneS.length === goal);
         }
     };
 
-    const renderStaticItems = (count) => {
-        return Array.from({ length: count }).map((_, i) => (
-            <div key={`static-${i}`} className="w-10 h-10 m-1">
+    const ShapeIcon = ({ colored }: { colored?: boolean }) => (
+        <div
+            style={{ width: shapeSize, height: shapeSize }}
+            dangerouslySetInnerHTML={{ __html: colored ? filledSvg : baseSvg }}
+        />
+    );
+
+    const renderBucket = (items: any[], id: string) => (
+        <Droppable droppableId={id} direction="horizontal">
+            {(p) => (
                 <div
-                    className="w-full h-full"
-                    dangerouslySetInnerHTML={{
-                        __html: getSizedSVG(getShapeSvg(validShape, true), 40),
-                    }}
-                />
-            </div>
-        ));
-    };
+                    ref={p.innerRef}
+                    {...p.droppableProps}
+                    className="flex flex-wrap bg-white rounded-lg p-2 shadow-sm min-h-[64px] w-full sm:w-48"
+                >
+                    {items.map((it, idx) => (
+                        <Draggable key={it.id} draggableId={it.id} index={idx}>
+                            {(p) => (
+                                <div
+                                    ref={p.innerRef}
+                                    {...p.draggableProps}
+                                    {...p.dragHandleProps}
+                                >
+                                    <ShapeIcon colored={id === "box2" && isCorrect} />
+                                </div>
+                            )}
+                        </Draggable>
+                    ))}
+                    {p.placeholder}
+                </div>
+            )}
+        </Droppable>
+    );
+
+    // read‑only bucket
+    const renderStaticBucket = (count: number, colored?: boolean) => (
+        <div className="flex flex-wrap bg-white rounded-lg p-2 shadow-sm min-h-[64px] w-full sm:w-48">
+            {Array.from({ length: count }).map((_, i) => (
+                <ShapeIcon key={i} colored={colored} />
+            ))}
+        </div>
+    );
 
     return (
-        <div className="flex flex-col items-center p-4 bg-gray-100 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">{question}</h2>
+        <div className="flex flex-col items-center space-y-6 p-4 w-full max-w-3xl mx-auto">
             <DragDropContext onDragEnd={onDragEnd}>
-                <Droppable droppableId="source" direction="horizontal">
-                    {(provided) => (
-                        <div
-                            className="flex flex-wrap w-64 min-h-[60px] bg-gray-200 p-2 rounded mb-6"
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                        >
-                            {sourceItems.map((item, index) => (
-                                <Draggable key={item.id} draggableId={item.id} index={index}>
-                                    {(provided) => (
-                                        <div
-                                            className="w-10 h-10 m-1"
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                        >
-                                            <div
-                                                className="w-full h-full"
-                                                dangerouslySetInnerHTML={{
-                                                    __html: getSizedSVG(getShapeSvg(validShape, true), 40),
-                                                }}
-                                            />
-                                        </div>
-                                    )}
-                                </Draggable>
-                            ))}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-                <div className="flex items-center space-x-2">
-                    <div className="flex flex-wrap justify-center items-center bg-white rounded p-2 w-36 h-36">
-                        {renderStaticItems(operand1)}
-                    </div>
-                    <div className="text-4xl font-bold">{operation}</div>
-                    <Droppable droppableId="box2" direction="horizontal">
-                        {(provided) => (
-                            <div
-                                className={`flex flex-wrap justify-center items-center bg-white rounded p-2 w-36 h-36 ${isCorrect ? "border-4 border-green-500" : ""
-                                    }`}
-                                ref={provided.innerRef}
-                                {...provided.droppableProps}
-                            >
-                                {secondBoxItems.map((item, index) => (
-                                    <Draggable key={item.id} draggableId={item.id} index={index}>
-                                        {(provided) => (
-                                            <div
-                                                className="w-10 h-10 m-1"
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                            >
-                                                <div
-                                                    className="w-full h-full"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: getSizedSVG(getShapeSvg(validShape, true), 40),
-                                                    }}
-                                                />
-                                            </div>
-                                        )}
-                                    </Draggable>
-                                ))}
-                                {provided.placeholder}
-                            </div>
-                        )}
-                    </Droppable>
-                    <div className="text-4xl font-bold">=</div>
-                    <div className="flex flex-wrap justify-center items-center bg-white rounded p-2 w-36 h-36">
-                        {renderStaticItems(result)}
-                    </div>
+                {renderBucket(source, "src")}
+
+                <div className="flex items-center justify-center flex-wrap gap-2 text-3xl font-bold mt-4 w-full">
+                    {renderStaticBucket(operand1)} 
+                    <div> {operation} </div>
+                    {renderBucket(box2, "box2")} 
+                    <div>=</div>
+                    {renderStaticBucket(result, isCorrect)} 
                 </div>
             </DragDropContext>
-            {isCorrect && (
-                <button className="mt-6 px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition">
-                    Next
-                </button>
-            )}
         </div>
     );
 };

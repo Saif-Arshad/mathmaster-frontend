@@ -47,11 +47,7 @@ const App: React.FC = () => {
                   <Login />
                 </ProtectedRoute>
               } />
-              <Route path="/game" element={
-                <ProtectedRoute requireUnauth={true}>
-                  <Game />
-                </ProtectedRoute>
-              } />
+            
               <Route path="/register" element={
                 <ProtectedRoute requireUnauth={true}>
                   <Register />

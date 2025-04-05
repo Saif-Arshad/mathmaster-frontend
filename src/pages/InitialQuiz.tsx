@@ -1,229 +1,134 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { Progress } from '@/components/ui/progress';
-import { useAuth } from '@/contexts/AuthContext';
-import { ArrowRight } from 'lucide-react';
-import axios from 'axios';
-
-type QuestionType = {
-  quiz_id: number;
-  question_text: string;
-  questionImage?: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  correct_option: string;
-  type?: string;
-};
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { ArrowRight } from "lucide-react";
+import axios from "axios";
+import {SortGame} from "../lib/Game/SortGame";
+import { BoxGame } from "../lib/Game/BoxGame";
+import { ColorUpGame } from "../lib/Game/ColorUpGame";
+import  EquationGame  from "../lib/Game/DivisionGame";
 
 const InitialQuiz: React.FC = () => {
-  const [questions, setQuestions] = useState<QuestionType[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [current, setCurrent] = useState(0);
+  const [correctFlags, setCorrectFlags] = useState<{ [id: number]: boolean }>({});
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // Redirect if the user already completed the quiz
+  /* auth redirects */
   useEffect(() => {
-    if (user.isAdmin === true) {
-      navigate("/admin");
-    }
-    if (user?.completedQuiz) {
-      navigate('/');
-    }
+    if (user?.isAdmin) navigate("/admin");
+    if (user?.completedQuiz) navigate("/");
   }, [user, navigate]);
 
-  // Fetch questions from backend
-  const fetchQuestions = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${backendUrl}/initial-quiz`);
-      setQuestions(res.data);
-      setCurrentQuestion(0);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to fetch questions",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  /* fetch */
   useEffect(() => {
-    fetchQuestions();
-  }, []);
-
-  const handleSelectAnswer = (quiz_id: number, answer: string) => {
-    setSelectedAnswers({
-      ...selectedAnswers,
-      [quiz_id]: answer,
-    });
-  };
-
-  const handleNextQuestion = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    }
-  };
-
-  const handlePrevQuestion = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-    }
-  };
-
-  const handleSubmitQuiz = async () => {
-    setIsSubmitting(true);
-
-    // Simple scoring: count questions where the selected answer matches the correct answer
-    const totalQuestions = questions.length;
-    let correctCount = 0;
-    questions.forEach(q => {
-      if (selectedAnswers[q.quiz_id] === q.correct_option) {
-        correctCount++;
+    (async () => {
+      try {
+        const { data } = await axios.get(`${backendUrl}/initial-quiz`);
+        setQuestions(data);
+      } catch (err: any) {
+        toast({ title: "Error", description: err.response?.data?.message || "Fetch failed", variant: "destructive" });
+      } finally {
+        setLoading(false);
       }
-    });
+    })();
+  }, [backendUrl, toast]);
 
-    const percentage = (correctCount / totalQuestions) * 100;
-    console.log("🚀 ~ handleSubmitQuiz ~ percentage:", percentage)
+  /* helpers */
+  const setIsCorrect = (val: boolean) => {
+    const id = questions[current].quiz_id;
+    setCorrectFlags({ ...correctFlags, [id]: val });
+  };
 
+  const next = () => setCurrent((p) => p + 1);
+  const prev = () => setCurrent((p) => p - 1);
+
+  const submit = async () => {
+    setSubmitting(true);
+    const correctCount = questions.filter((q) => correctFlags[q.quiz_id]).length;
+    const percent = (correctCount / questions.length) * 100;
     const storedUser = localStorage.getItem('mathmaster_user');
 
 
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      try {
-        const payload = {
-          user_id: parsedUser.user_id,
-          percentage: Math.round(percentage)
-        }
-        const res = await axios.post(`${backendUrl}/user/submit-inital`, payload);
-
-      } catch (error) {
-        console.log("🚀 ~ handleSubmitQuiz ~ error:", error)
-
-      }
+    
       const updatedUser = {
         ...parsedUser,
-        level: percentage,
+        level: percent,
         completedQuiz: true,
       };
       localStorage.setItem('mathmaster_user', JSON.stringify(updatedUser));
     }
 
-    toast({
-      title: "Assessment Completed!",
-      description: `Your score is ${Math.round(percentage)}%.`,
-    });
-    setIsSubmitting(false);
-    window.location.href = '/'
-  }
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading questions...
-      </div>
-    );
-  }
+    try {
+      // @ts-ignore
+      await axios.post(`${backendUrl}/user/submit-inital`, { user_id: user.user_id, percentage: Math.round(percent) });
+      toast({ title: "Assessment Completed!", description: `Your score is ${Math.round(percent)}%.` });
+      window.location.href = "/";
 
-  if (questions.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        No questions available.
-      </div>
-    );
-  }
+    } catch (err) {
+      toast({ title: "Error", description: "Submit failed", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-  const currentQuestionData = questions[currentQuestion];
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
-  const isQuestionAnswered = selectedAnswers[currentQuestionData.quiz_id] !== undefined;
-  const isLastQuestion = currentQuestion === questions.length - 1;
-  const areAllQuestionsAnswered = questions.every(q => selectedAnswers[q.quiz_id] !== undefined);
+  /* loading states */
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
+  if (!questions.length) return <div className="min-h-screen flex items-center justify-center">No questions.</div>;
+
+  const q = questions[current];
+  const progress = ((current + 1) / questions.length) * 100;
+  const answered = !!correctFlags[q.quiz_id];
+  const last = current === questions.length - 1;
+
+  /* render game by type */
+  const renderGame = () => {
+    switch (q.game) {
+      case "Color Up Game":
+        return <ColorUpGame shape={q.colorUp_shape as any} totalItems={q.colorUp_totalItem!} colorCount={q.colorUp_coloredCount!} isCorrect={answered} setIsCorrect={setIsCorrect} />;
+      case "Sort Game":
+        return <SortGame shape={q.sort_shape as any} totalItem={q.sort_totalItem!} order={q.sort_order as any} isCorrect={answered} setIsCorrect={setIsCorrect} />;
+      case "Box Game":
+        return <BoxGame shape={q.box_shape as any} startInBox={q.box_firstBoxCount!} targetInBox={q.box_secondBoxCount!} isCorrect={answered} setIsCorrect={setIsCorrect} />;
+      case "Equation Game":
+        return <EquationGame shape={q.equation_shape as any} operand1={q.equation_firstBoxCount!} operand2={q.equation_secondBoxCount!} operation={q.equation_operation} result={q.equation_finalBoxcount!} isCorrect={answered} setIsCorrect={setIsCorrect} />;
+      default:
+        return <div>Unknown game type.</div>;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Initial Assessment</h1>
-          <p className="text-gray-600 mt-2">
-            Let's see what math level is right for you!
-          </p>
-        </div>
-
-        <div className="mb-6">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div>
           <div className="flex justify-between text-sm mb-2">
-            <span>
-              Question {currentQuestion + 1} of {questions.length}
-            </span>
+            <span>Question {current + 1} / {questions.length}</span>
             <span>{Math.round(progress)}% complete</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} />
         </div>
 
-        <Card className="mb-6 overflow-hidden shadow-lg">
-          <CardContent className="p-6">
-            <div className="text-xl font-medium mb-6">
-              {currentQuestionData.question_text}
-            </div>
-            {currentQuestionData.questionImage && (
-              <div className="mb-4">
-                <img src={currentQuestionData.questionImage} alt="Question" className="w-full" />
-              </div>
-            )}
-            <div className="space-y-3">
-              {[
-                currentQuestionData.option_a,
-                currentQuestionData.option_b,
-                currentQuestionData.option_c,
-                currentQuestionData.option_d,
-              ].map((option, index) => (
-                <div
-                  key={index}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedAnswers[currentQuestionData.quiz_id] === option
-                    ? "border-mathpath-purple bg-mathpath-lightPurple"
-                    : "border-gray-200 hover:border-mathpath-purple"
-                    }`}
-                  onClick={() => handleSelectAnswer(currentQuestionData.quiz_id, option)}
-                >
-                  {option}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <h2 className="text-xl font-bold text-center">{q.question_text}</h2>
+        {renderGame()}
 
         <div className="flex justify-between">
-          <Button variant="outline" onClick={handlePrevQuestion} disabled={currentQuestion === 0}>
-            Previous
-          </Button>
-
-          {isLastQuestion ? (
-            <Button
-              onClick={handleSubmitQuiz}
-              disabled={!areAllQuestionsAnswered || isSubmitting}
-              className="bg-mathpath-purple hover:bg-purple-600"
-            >
-              {isSubmitting ? "Submitting..." : "Submit Quiz"}
-            </Button>
+          <Button variant="outline" onClick={prev} disabled={current === 0}>Previous</Button>
+          {last ? (
+            <Button onClick={submit} disabled={!answered || submitting} className="bg-mathpath-purple hover:bg-purple-600">{submitting ? "Submitting…" : "Submit"}</Button>
           ) : (
-            <Button
-              onClick={handleNextQuestion}
-              disabled={!isQuestionAnswered}
-              className="bg-mathpath-purple hover:bg-purple-600"
-            >
-              Next <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <Button onClick={next} disabled={!answered} className="bg-mathpath-purple hover:bg-purple-600">Next <ArrowRight className="ml-2 h-4 w-4" /></Button>
           )}
         </div>
       </div>

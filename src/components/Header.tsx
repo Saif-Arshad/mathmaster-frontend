@@ -40,7 +40,6 @@ const Header: React.FC = () => {
     );
   }
 
-  // Sidebar style for authenticated users
   return (
     <div className="fixed left-0 top-0 h-full bg-mathpath-purple text-white w-64 p-6 flex flex-col">
       <div className="mb-6">
@@ -62,12 +61,7 @@ const Header: React.FC = () => {
           <BookOpen size={20} />
           <span>Practic Page</span>
         </Link>
-        
-        <Link to="/settings" className="flex items-center gap-3 bg-white/20 hover:bg-white/30 transition-colors p-3 rounded-xl">
-          <Settings size={20} />
-          <span>Settings</span>
-        </Link>
-        
+
         <Link to="/contact" className="flex items-center gap-3 bg-white/20 hover:bg-white/30 transition-colors p-3 rounded-xl">
           <Mail size={20} />
           <span>Contact Us</span>
