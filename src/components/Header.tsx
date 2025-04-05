@@ -59,7 +59,7 @@ const Header: React.FC = () => {
         
         <Link to="/practice" className="flex items-center gap-3 bg-white/20 hover:bg-white/30 transition-colors p-3 rounded-xl">
           <BookOpen size={20} />
-          <span>Practic Page</span>
+          <span>Practice</span>
         </Link>
 
         <Link to="/contact" className="flex items-center gap-3 bg-white/20 hover:bg-white/30 transition-colors p-3 rounded-xl">

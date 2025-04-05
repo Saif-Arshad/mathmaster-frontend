@@ -1,18 +1,76 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '@/components/Header';
-import { ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
 
-interface Sublevel { sublevel_id: number; sublevel_discription: string; }
-interface Level { level_id: number; level_name: string; sublevels: Sublevel[]; }
+interface Sublevel {
+  sublevel_id: number;
+  sublevel_discription: string;
+  isCompleted?: boolean;
+}
+
+interface Level {
+  level_id: number;
+  level_name: string;
+  discription: string;
+  sublevels: Sublevel[];
+}
+
+const LEVEL_DIAMETER = 126;
+const SUB_DIAMETER = 92;
+const STEP_Y = 160;
+const STEP_X = 600;
+
+type Node = {
+  id: string;
+  order: number;
+  radius: number;
+  label: string;
+  isCompleted: boolean;
+  progressPct?: number;
+  description: string;
+};
+
+const CircleTip: React.FC<{ tip: React.ReactNode; children: React.ReactNode }> = ({
+  tip,
+  children,
+}) => (
+  <Tooltip.Provider delayDuration={100}>
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
+      <Tooltip.Content
+        className="rounded bg-black/80 text-white px-3 py-1 text-center text-xs shadow-md select-none"
+        sideOffset={6}
+      >
+        {tip}
+        <Tooltip.Arrow className="fill-black/80" />
+      </Tooltip.Content>
+    </Tooltip.Root>
+  </Tooltip.Provider>
+);
+
+const WaveMask: React.FC = () => (
+  <svg width="0" height="0">
+    <defs>
+      <clipPath id="wave" clipPathUnits="objectBoundingBox">
+        <path
+          d="
+          M0,0.8
+          C0.25,0.9 0.25,0.7 0.5,0.8
+          C0.75,0.9 0.75,0.7 1,0.8
+          L1,1 L0,1 Z
+        "
+        />
+      </clipPath>
+    </defs>
+  </svg>
+);
 
 const Home: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -21,93 +79,170 @@ const Home: React.FC = () => {
 
   const [levels, setLevels] = useState<Level[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scale, setScale] = useState(1);
 
+  // redirects
   useEffect(() => {
     if (!isAuthenticated) navigate('/login');
     if (user?.isAdmin) navigate('/admin');
     if (user && user.completedQuiz === false) navigate('/initial-quiz');
   }, [isAuthenticated, user, navigate]);
 
+  // fetch levels
   useEffect(() => {
     (async () => {
       try {
         const { data } = await axios.get(`${backendUrl}/admin/levels`);
-        setLevels(data);
+        console.log("🚀 ~ data:", data)
+        const ordered = [...data].sort(
+          (a: Level, b: Level) =>
+            Number(a.level_name.split(' ')[1]) - Number(b.level_name.split(' ')[1]),
+        );
+        setLevels(ordered);
       } catch (err: any) {
-        toast({ title: 'Error', description: err.response?.data?.message || 'Failed to load levels', variant: 'destructive' });
-      } finally { setLoading(false); }
+        toast({
+          title: 'Error',
+          description: err.response?.data?.message || 'Failed to load levels',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
     })();
-  }, []);
+  }, [toast]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl">Loading…</div>;
+  // build graph nodes
+  const nodes: Node[] = useMemo(() => {
+    const out: Node[] = [];
+
+    levels.forEach((lvl) => {
+      const completedSubs = lvl.sublevels.filter((s) => s.isCompleted).length;
+      const pct = lvl.sublevels.length
+        ? (completedSubs / lvl.sublevels.length) * 100
+        : 0;
+
+      out.push({
+        id: `level-${lvl.level_id}`,
+        order: out.length,
+        radius: LEVEL_DIAMETER / 2,
+        label: lvl.level_name,
+        isCompleted: pct === 100,
+        progressPct: pct,
+        description: lvl.discription,
+      });
+
+      lvl.sublevels.forEach((sub, sIdx) => {
+        out.push({
+          id: `sub-${sub.sublevel_id}`,
+          order: out.length,
+          radius: SUB_DIAMETER / 2,
+          label: `SubLevel ${sIdx + 1}`,
+          isCompleted: Boolean(sub.isCompleted),
+          description: lvl.discription,
+        });
+      });
+    });
+
+    return out;
+  }, [levels]);
+
+  const totalHeight = nodes.length * STEP_Y + LEVEL_DIAMETER;
+  const logicalWidth = STEP_X + LEVEL_DIAMETER + 80;
+
+  // responsive scale
+  useEffect(() => {
+    const calcScale = () => {
+      const available = window.innerWidth - 300;
+      const newScale = available < logicalWidth ? available / logicalWidth : 1;
+      setScale(newScale);
+    };
+    calcScale();
+    window.addEventListener('resize', calcScale);
+    return () => window.removeEventListener('resize', calcScale);
+  }, [logicalWidth]);
+
+  // curved coords (3 nodes per arc)
+  const amplitude = STEP_X;
+  const wavelength = 3;
+
+  const coords = (n: Node) => {
+    const i = n.order;
+    const y = i * STEP_Y;
+    const angle = (i / wavelength) * Math.PI;
+    const x = ((Math.sin(angle) + 1) / 2) * amplitude;
+    return { x, y };
+  };
 
   return (
     <div className="min-h-screen bg-sky-100">
       <Header />
 
       <main className="ml-64 pt-8 px-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-12">Home</h1>
+        {loading ? (
+          'Loading...'
+        ) : (
+          <div className="overflow-x-auto mx-auto pb-24">
+            <div
+              className="relative mx-auto origin-bottom-left"
+              style={{
+                height: totalHeight * scale,
+                width: logicalWidth * scale,
+                transform: `scale(${scale})`,
+              }}
+            >
+              <WaveMask />
+              {nodes.map((n) => {
+                const { x, y } = coords(n);
+                const left = x;
+                const top = totalHeight - y - n.radius * 2;
+                const isLevel = n.radius === LEVEL_DIAMETER / 2;
 
-        <div className="relative overflow-x-auto pb-24">
-          {/* Level progression visualization */}
-          <div className="learning-path min-h-[400px] w-full px-6 relative">
-            {levels.map((level, i) => (
-              <div key={level.level_id} className="level-container relative">
-                {/* Level bubble */}
-                <div 
-                  className={`level-bubble absolute ${i % 2 === 0 ? 'right-10' : 'left-10'} ${i === 0 ? 'bottom-0' : ''}`}
-                  style={{
-                    bottom: `${i * 80}px`,
-                    transform: i % 2 === 0 ? 'translateX(-30px)' : 'translateX(30px)',
-                  }}
-                >
-                  <div className={`${i % 2 === 0 ? 'bg-pink-500' : 'bg-yellow-400'} text-white font-bold px-6 py-3 rounded-lg shadow-lg`}>
-                    {level.level_name}
-                  </div>
-                  
-                  {/* Sublevels */}
-                  {level.sublevels.map((sublevel, j) => (
-                    <div 
-                      key={sublevel.sublevel_id}
-                      className="sublevel-bubble absolute"
+                const baseClass = n.isCompleted
+                  ? 'bg-pink-500 text-white'
+                  : 'bg-yellow-400 text-black';
+
+                const progressStyle =
+                  isLevel && !n.isCompleted && n.progressPct
+                    ? {
+                      backgroundImage: 'linear-gradient(#ec4899 0 0)',
+                      backgroundSize: `100% ${n.progressPct}%`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: `0 ${100 - n.progressPct}%`,
+                      clipPath: 'url(#wave)',
+                      transition: 'background-position 0.6s ease-in-out',
+                    }
+                    : {};
+
+                return (
+                  <CircleTip
+                    key={n.id}
+                    tip={
+                      <>
+                        <strong>{n.label}</strong>
+                        <br />
+                        {n.description}
+                      </>
+                    }
+                  >
+                    <div
+                      className={`absolute flex items-center justify-center font-medium whitespace-nowrap rounded-full shadow ${baseClass}`}
                       style={{
-                        left: i % 2 === 0 ? `-${180 + j * 20}px` : `${100 + j * 20}px`,
-                        bottom: `${50 + j * 70}px`,
-                        zIndex: level.sublevels.length - j,
+                        left,
+                        top,
+                        width: n.radius * 2,
+                        height: n.radius * 2,
+                        fontSize: isLevel ? '1rem' : '0.8rem',
+                        ...progressStyle,
                       }}
                     >
-                      <div className="relative">
-                        {/* Connector line */}
-                        <div 
-                          className={`absolute ${i % 2 === 0 ? 'right-full' : 'left-full'} top-1/2 h-1 ${i % 2 === 0 ? 'bg-pink-400' : 'bg-yellow-500'}`} 
-                          style={{ 
-                            width: `${40 + j * 5}px`,
-                            transform: 'translateY(-50%)'
-                          }}
-                        ></div>
-                        
-                        {/* Sublevel circle */}
-                        <div className="relative z-10 bg-yellow-300 w-16 h-16 rounded-full flex items-center justify-center font-bold text-black shadow-md">
-                          Sublevel {j + 1}
-                        </div>
-                      </div>
+                      {n.label}
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            {/* Continue Practice Button */}
-            <div className="absolute bottom-0 right-0 mb-10">
-              <Link to="/practice">
-                <Button className="bg-mathpath-purple hover:bg-purple-700 text-white px-6 py-2 rounded-full flex items-center gap-2 text-lg shadow-lg">
-                  Continue Practice
-                  <ArrowRight className="ml-1" />
-                </Button>
-              </Link>
+                  </CircleTip>
+                );
+              })}
             </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );
