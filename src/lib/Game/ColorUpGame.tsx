@@ -13,6 +13,10 @@ type Props = {
 
 export const ColorUpGame: React.FC<Props> = ({ shape, totalItems, colorCount, isCorrect, setIsCorrect }) => {
   const [colored, setColored] = useState(Array(totalItems).fill(false));
+  console.log("🚀 ~ isCorrect:", isCorrect)
+  console.log("🚀 ~ colorCount:", colorCount)
+  console.log("🚀 ~ totalItems:", totalItems)
+  console.log("🚀 ~ shape:", shape)
 
   const toggle = (idx: number) => {
     const arr = [...colored];
@@ -22,9 +26,9 @@ export const ColorUpGame: React.FC<Props> = ({ shape, totalItems, colorCount, is
   };
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 p-4">
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 gap-y-16 p-4">
       {Array.from({ length: totalItems }).map((_, i) => (
-        <div key={i} className="w-24 h-24" onClick={() => toggle(i)} dangerouslySetInnerHTML={{ __html: colored[i] || isCorrect ? getColoredSVG2(shapes[shape].uncolored, shape) : shapes[shape].uncolored }} />
+        <div key={i} className="w- " onClick={() => toggle(i)} dangerouslySetInnerHTML={{ __html: colored[i] || isCorrect ? getColoredSVG2(shapes[shape].uncolored, shape) : shapes[shape].uncolored }} />
       ))}
     </div>
   );

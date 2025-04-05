@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 type User = {
-  id: string;
+  user_id: string;
   email: string;
   username: string;
   age: number;
@@ -26,6 +26,8 @@ type AuthContextType = {
   resendOTP: () => Promise<void>;
   unverifiedEmail: string | null;
   error: string | null;
+  userProgress:any,
+  setUserProgress:any,
   setError: (error: string | null) => void;
 };
 
@@ -41,6 +43,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [userProgress,setUserProgress] = useState<any>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
@@ -244,6 +247,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loginAdmin,
         resendOTP,
         unverifiedEmail,
+        userProgress,
+        setUserProgress,
         error,
         setError
       }}

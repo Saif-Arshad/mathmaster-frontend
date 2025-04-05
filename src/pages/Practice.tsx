@@ -1,559 +1,280 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import Header from '@/components/Header';
-import { HelpCircle, AlertCircle, CheckCircle2, XCircle, Trophy } from 'lucide-react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import Header from "@/components/Header";
+import { HelpCircle, Lightbulb, Trophy } from "lucide-react";
+import axios from "axios";
 
-const PRACTICE_QUESTIONS = {
-  1: { // Level 1
-    1: [ // Sublevel 1
-      {
-        id: 'l1-s1-q1',
-        question: 'What is 2 + 3?',
-        options: ['4', '5', '6', '7'],
-        correctAnswer: '5',
-        difficulty: 1
-      },
-      {
-        id: 'l1-s1-q2',
-        question: 'What is 1 + 4?',
-        options: ['3', '4', '5', '6'],
-        correctAnswer: '5',
-        difficulty: 1
-      },
-    ],
-    2: [ // Sublevel 2
-      {
-        id: 'l1-s2-q1',
-        question: 'What is 4 + 5?',
-        options: ['7', '8', '9', '10'],
-        correctAnswer: '9',
-        difficulty: 1
-      },
-    ],
-    3: [ // Sublevel 3 (quiz prep)
-      {
-        id: 'l1-s3-q1',
-        question: 'What is 6 + 7?',
-        options: ['11', '12', '13', '14'],
-        correctAnswer: '13',
-        difficulty: 1
-      },
-    ]
-  },
-  2: { // Level 2
-    1: [ // Sublevel 1
-      {
-        id: 'l2-s1-q1',
-        question: 'What is 10 - 3?',
-        options: ['5', '6', '7', '8'],
-        correctAnswer: '7',
-        difficulty: 2
-      },
-    ],
-  },
-};
+import { ColorUpGame } from "../lib/Game/ColorUpGame";
+import { SortGame } from "../lib/Game/SortGame";
+import { BoxGame } from "../lib/Game/BoxGame";
+import EquationGame from "../lib/Game/DivisionGame";
 
-const QUIZ_QUESTIONS = {
-  1: [
-    {
-      id: 'quiz-l1-q1',
-      question: 'What is 5 + 8?',
-      options: ['11', '12', '13', '14'],
-      correctAnswer: '13'
-    },
-    {
-      id: 'quiz-l1-q2',
-      question: 'What is 9 + 4?',
-      options: ['11', '12', '13', '14'],
-      correctAnswer: '13'
-    },
-    {
-      id: 'quiz-l1-q3',
-      question: 'What is 7 + 6?',
-      options: ['11', '12', '13', '14'],
-      correctAnswer: '13'
-    },
-    {
-      id: 'quiz-l1-q4',
-      question: 'What is 3 + 9?',
-      options: ['10', '11', '12', '13'],
-      correctAnswer: '12'
-    },
-    {
-      id: 'quiz-l1-q5',
-      question: 'What is 8 + 5?',
-      options: ['11', '12', '13', '14'],
-      correctAnswer: '13'
-    },
-    {
-      id: 'quiz-l1-q6',
-      question: 'What is 4 + 8?',
-      options: ['10', '11', '12', '13'],
-      correctAnswer: '12'
-    },
-    {
-      id: 'quiz-l1-q7',
-      question: 'What is 2 + 9?',
-      options: ['9', '10', '11', '12'],
-      correctAnswer: '11'
-    },
-    {
-      id: 'quiz-l1-q8',
-      question: 'What is 6 + 8?',
-      options: ['12', '13', '14', '15'],
-      correctAnswer: '14'
-    },
-    {
-      id: 'quiz-l1-q9',
-      question: 'What is 7 + 7?',
-      options: ['12', '13', '14', '15'],
-      correctAnswer: '14'
-    },
-    {
-      id: 'quiz-l1-q10',
-      question: 'What is 9 + 9?',
-      options: ['16', '17', '18', '19'],
-      correctAnswer: '18'
-    }
-  ],
-};
-
-const getHint = (questionId: string) => {
-  return {
-    question: 'What is 1 + 4?',
-    steps: [
-      'First, visualize 1 object.',
-      'Then, add 4 more objects.',
-      'Count all the objects: 1, 2, 3, 4, 5.',
-      'So 1 + 4 = 5'
-    ],
-    answer: '5'
+interface Question {
+  questionId: number;
+  question: string;
+  gameType: "Color Up Game" | "Sort Game" | "Box Game" | "Equation Game";
+  difficulty: number;
+  sortOrder: number;
+  colorUp_shape?: string;
+  colorUp_totalItem?: number;
+  colorUp_coloredCount?: number;
+  sort_order?: "asc" | "desc";
+  sort_shape?: string;
+  sort_totalItem?: number;
+  box_shape?: string;
+  box_firstBoxCount?: number;
+  box_secondBoxCount?: number;
+  equation_shape?: string;
+  equation_operation?: string;
+  equation_finalBoxcount?: number;
+  equation_firstBoxCount?: number;
+  equation_secondBoxCount?: number;
+  level: {
+    level_id: number;
+    level_name: string;
+    min_passing_percentage: number;
+    discription: string;
   };
+}
+
+const HINT = {
+  question: "Need help?",
+  steps: [
+    "Look at the objects carefully.",
+    "Follow the instruction on the screen.",
+    "Try moving one item at a time.",
+  ],
+  answer: "🎉",
 };
 
 const Practice: React.FC = () => {
-  const [currentLevel, setCurrentLevel] = useState(1);
-  const [currentSubLevel, setCurrentSubLevel] = useState(1);
-  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
-  const [totalAnswered, setTotalAnswered] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [answerStatus, setAnswerStatus] = useState<'correct' | 'incorrect' | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [current, setCurrent] = useState(0);
+  const [answeredFlags, setAnsweredFlags] = useState<Record<number, boolean>>({});
   const [showHint, setShowHint] = useState(false);
-  const [hint, setHint] = useState<{ question: string; steps: string[]; answer: string } | null>(null);
-  const [showQuizButton, setShowQuizButton] = useState(false);
-  const [quizMode, setQuizMode] = useState(false);
-  const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: string }>({});
-  const [quizResults, setQuizResults] = useState<{ total: number; correct: number; percentage: number } | null>(null);
-  const [showQuizResults, setShowQuizResults] = useState(false);
+  const [showCongrats, setShowCongrats] = useState(false);
 
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
-
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
+    if (!user) return;
 
-    if (user) {
-      setCurrentLevel(user.level || 1);
-      setCurrentSubLevel(1);
-      setCorrectAnswersCount(0);
-      setTotalAnswered(0);
-      setCurrentQuestion(0);
-      setSelectedAnswer(null);
-      setAnswerStatus(null);
-      setShowQuizButton(false);
-      setQuizMode(false);
-    }
-  }, [isAuthenticated, navigate, user]);
+    (async () => {
+      try {
+        const { data } = await axios.get(
+          `${backendUrl}/admin/questions/${user.user_id}`
+        );
 
-  const questions = quizMode
-    ? QUIZ_QUESTIONS[currentLevel as keyof typeof QUIZ_QUESTIONS] || []
-    : (PRACTICE_QUESTIONS[currentLevel as keyof typeof PRACTICE_QUESTIONS]?.[
-      currentSubLevel as keyof (typeof PRACTICE_QUESTIONS)[keyof typeof PRACTICE_QUESTIONS]
-    ] || []);
+        if (!data?.questions?.length) throw new Error("No questions received");
 
-  const currentQuestionData = questions[currentQuestion];
+        const normalised: Question[] = data.questions.map((q: any) => ({
+          ...q,
+          questionId: q.question_id,
+          question: q.question_text,
+          gameType: q.game, 
+          difficulty: q.difficulty ?? 1,
+          sortOrder: q.sortOrder ?? q.sort_order ?? 0,
+        }));
 
-  const handleSelectAnswer = (answer: string) => {
-    if (answerStatus !== null || !currentQuestionData) return;
+        normalised.sort((a, b) => a.sortOrder - b.sortOrder);
 
-    setSelectedAnswer(answer);
-
-    if (quizMode) {
-      setQuizAnswers({
-        ...quizAnswers,
-        [currentQuestionData.id]: answer
-      });
-
-      if (currentQuestion < questions.length - 1) {
-        setTimeout(() => {
-          setCurrentQuestion(currentQuestion + 1);
-          setSelectedAnswer(null);
-        }, 500);
-      }
-    } else {
-      const isCorrect = answer === currentQuestionData.correctAnswer;
-      setAnswerStatus(isCorrect ? 'correct' : 'incorrect');
-
-      setTotalAnswered(prev => prev + 1);
-      if (isCorrect) {
-        setCorrectAnswersCount(prev => prev + 1);
-      }
-
-      if (currentSubLevel === 3 && correctAnswersCount >= 2) {
-        setShowQuizButton(true);
-      }
-
-      if (currentSubLevel < 3 && correctAnswersCount >= 4) {
+        setQuestions(normalised);
+      } catch (err: any) {
         toast({
-          title: "Sublevel Completed!",
-          description: `You've completed sublevel ${currentSubLevel} of level ${currentLevel}.`,
+          title: "Error",
+          description: err.response?.data?.message || err.message,
+          variant: "destructive",
         });
-
-        setCurrentSubLevel(prev => prev + 1);
-        setCorrectAnswersCount(0);
-        setTotalAnswered(0);
       }
+    })();
+  }, [backendUrl, isAuthenticated, navigate, toast, user]);
+
+
+  const q = questions[current];
+  const totalAnswered = Object.keys(answeredFlags).length;
+  const correctCount = Object.values(answeredFlags).filter(Boolean).length;
+
+  const setIsCorrect = (val: boolean) => {
+    setAnsweredFlags((prev) => ({ ...prev, [q.questionId]: val }));
+    if (current === questions.length - 1 && val) setShowCongrats(true);
+  };
+  const next = () => setCurrent((p) => p + 1);
+  const prev = () => setCurrent((p) => p - 1);
+
+  const renderGame = () => {
+    switch (q.gameType) {
+      case "Color Up Game":
+        return (
+          <ColorUpGame
+            shape={q.colorUp_shape as any}
+            totalItems={q.colorUp_totalItem!}
+            colorCount={q.colorUp_coloredCount!}
+            isCorrect={!!answeredFlags[q.questionId]}
+            setIsCorrect={setIsCorrect}
+          />
+        );
+      case "Sort Game":
+        return (
+          <SortGame
+            shape={q.sort_shape as any}
+            totalItem={q.sort_totalItem!}
+            order={q.sort_order as any}
+            isCorrect={!!answeredFlags[q.questionId]}
+            setIsCorrect={setIsCorrect}
+          />
+        );
+      case "Box Game":
+        return (
+          <BoxGame
+            shape={q.box_shape as any}
+            startInBox={q.box_firstBoxCount!}
+            targetInBox={q.box_secondBoxCount!}
+            isCorrect={!!answeredFlags[q.questionId]}
+            setIsCorrect={setIsCorrect}
+          />
+        );
+      case "Equation Game":
+        return (
+          <EquationGame
+            shape={q.equation_shape as any}
+            operand1={q.equation_firstBoxCount!}
+            operand2={q.equation_secondBoxCount!}
+            operation={q.equation_operation as "+" | "-" | "*"}
+            result={q.equation_finalBoxcount!}
+            isCorrect={!!answeredFlags[q.questionId]}
+            setIsCorrect={setIsCorrect}
+          />
+        );
+      default:
+        return <div>Unknown game type.</div>;
     }
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      setCurrentQuestion(0);
-    }
-
-    setSelectedAnswer(null);
-    setAnswerStatus(null);
-  };
-
-  const handleShowHint = () => {
-    if (!currentQuestionData) return;
-
-    const hintData = getHint(currentQuestionData.id);
-    setHint(hintData);
-    setShowHint(true);
-  };
-
-  const handleStartQuiz = () => {
-    setQuizMode(true);
-    setCurrentQuestion(0);
-    setSelectedAnswer(null);
-    setAnswerStatus(null);
-    setQuizAnswers({});
-    setQuizResults(null);
-
-    toast({
-      title: "Quiz Started",
-      description: "Good luck! Try to answer at least 70% correctly.",
-    });
-  };
-
-  const handleSubmitQuiz = () => {
-    const quizQuestions = QUIZ_QUESTIONS[currentLevel as keyof typeof QUIZ_QUESTIONS] || [];
-    let correctCount = 0;
-
-    quizQuestions.forEach(question => {
-      if (quizAnswers[question.id] === question.correctAnswer) {
-        correctCount++;
-      }
-    });
-
-    const percentage = (correctCount / quizQuestions.length) * 100;
-    const passed = percentage >= 70;
-
-    setQuizResults({
-      total: quizQuestions.length,
-      correct: correctCount,
-      percentage
-    });
-
-    setShowQuizResults(true);
-
-    if (passed) {
-      toast({
-        title: "Congratulations!",
-        description: `You passed the quiz with ${percentage.toFixed(0)}%. Moving to the next level!`,
-      });
-
-      const storedUser = localStorage.getItem('mathmaster_user');
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        const updatedUser = {
-          ...parsedUser,
-          level: currentLevel + 1
-        };
-        localStorage.setItem('mathmaster_user', JSON.stringify(updatedUser));
-      }
-
-      setCurrentLevel(prev => prev + 1);
-      setCurrentSubLevel(1);
-      setCorrectAnswersCount(0);
-      setTotalAnswered(0);
-      setQuizMode(false);
-      setShowQuizButton(false);
-    } else {
-      toast({
-        title: "Keep Practicing",
-        description: `You got ${percentage.toFixed(0)}%. You need 70% to pass.`,
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleCloseQuizResults = () => {
-    setShowQuizResults(false);
-    setQuizMode(false);
-    setCurrentQuestion(0);
-    setSelectedAnswer(null);
-    setAnswerStatus(null);
-  };
-
-  if (!currentQuestionData) {
+  if (!questions.length)
     return (
-      <div className="min-h-screen bg-sky-100">
-        <Header />
-        <div className="ml-64 pt-8 px-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">No Questions Available</h1>
-          <p className="text-gray-600 mb-8">
-            We're preparing more content for this level. Please check back soon!
-          </p>
-          <Button onClick={() => navigate('/')} className="bg-mathpath-purple hover:bg-purple-600">
-            Return Home
-          </Button>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        Loading…
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen bg-sky-100">
       <Header />
 
-      <main className="ml-64 pt-8 px-12">
-        <div className="mb-8 flex flex-wrap items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Practice</h1>
-            <p className="text-gray-600 mt-1">
-              {quizMode
-                ? `Level ${currentLevel} Quiz`
-                : `Level ${currentLevel} - Sublevel ${currentSubLevel}`}
+      <main className="ml-64 py-8 px-12 max-w-4xl mx-auto space-y-6">
+        <div className="flex justify-between text-sm mb-4">
+          <span>
+            <h2 className="font-semibold text-xl">Practice</h2>
+            <p>
+              {q.level.level_name} – SubLevel {Math.floor(correctCount / 5 == 0 ? 1 : correctCount / 5)}
             </p>
-          </div>
-
-          {!quizMode && showQuizButton && (
-            <Button
-              onClick={handleStartQuiz}
-              className="mt-4 sm:mt-0 bg-mathpath-purple hover:bg-purple-600 animate-pulse-subtle"
-            >
-              Take The Quiz
-            </Button>
-          )}
-
-          {quizMode && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">
-                Question {currentQuestion + 1} of {questions.length}
-              </span>
-              {currentQuestion === questions.length - 1 && Object.keys(quizAnswers).length === questions.length && (
-                <Button
-                  onClick={handleSubmitQuiz}
-                  className="bg-mathpath-purple hover:bg-purple-600"
-                >
-                  Submit Quiz
-                </Button>
-              )}
-            </div>
-          )}
+          </span>
+          <span>
+            {correctCount} correct out of {totalAnswered} answered
+          </span>
         </div>
 
-        {!quizMode && (
-          <div className="flex items-center justify-between mb-4 p-4 bg-white rounded-lg shadow-sm">
-            <div>
-              <span className="text-sm text-gray-500">Progress: </span>
-              <span className="font-medium">
-                {correctAnswersCount} correct out of {totalAnswered} answered
-              </span>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleShowHint}
-              className="text-mathpath-purple border-mathpath-purple hover:bg-mathpath-lightPurple"
-            >
-              <HelpCircle className="mr-2 h-4 w-4" />
-              Hint
-            </Button>
-          </div>
-        )}
+        <Card>
+          <CardContent className="p-6 pb-20 space-y-6">
+            <div className="flex justify-end ">
 
-        <Card className="mb-6 overflow-hidden shadow-lg">
-          <CardContent className="p-6">
-            <div className="text-xl font-medium mb-6">
-              {currentQuestionData.question}
+              <Button
+                variant="outline"
+                onClick={() => setShowHint(true)}
+                className="text-mathpath-purple border-mathpath-purple hover:bg-mathpath-lightPurple"
+              >
+
+                <Lightbulb className=" h-5 w-5" />
+                Hint
+              </Button>
             </div>
 
-            <div className="space-y-3">
-              {currentQuestionData.options.map((option) => {
-                const isSelected = selectedAnswer === option;
-                const isCorrect = currentQuestionData.correctAnswer === option;
-                const showCorrect = answerStatus !== null;
-
-                return (
-                  <div
-                    key={option}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all flex justify-between items-center ${isSelected
-                        ? "border-mathpath-purple bg-mathpath-lightPurple"
-                        : "border-gray-200 hover:border-mathpath-purple"
-                      } ${showCorrect && isCorrect
-                        ? "border-green-500 bg-green-50"
-                        : showCorrect && isSelected && !isCorrect
-                          ? "border-red-500 bg-red-50"
-                          : ""
-                      }`}
-                    onClick={() => handleSelectAnswer(option)}
-                  >
-                    <span>{option}</span>
-                    {showCorrect && isCorrect && (
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    )}
-                    {showCorrect && isSelected && !isCorrect && (
-                      <XCircle className="h-5 w-5 text-red-500" />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {answerStatus && (
-              <div className={`mt-6 p-4 rounded-lg ${answerStatus === 'correct'
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : "bg-red-50 text-red-700 border border-red-200"
-                }`}>
-                <div className="flex items-center">
-                  {answerStatus === 'correct'
-                    ? <CheckCircle2 className="h-5 w-5 mr-2" />
-                    : <AlertCircle className="h-5 w-5 mr-2" />
-                  }
-                  <span className="font-medium">
-                    {answerStatus === 'correct'
-                      ? "Correct! Great job!"
-                      : `Incorrect. The correct answer is ${currentQuestionData.correctAnswer}.`
-                    }
-                  </span>
-                </div>
-              </div>
-            )}
+            <h2 className="text-xl font-semibold text-start capitalize">{q.question}</h2>
+            {renderGame()}
           </CardContent>
         </Card>
 
-        {!quizMode && answerStatus !== null && (
-          <div className="flex justify-end">
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={prev} disabled={current === 0}>
+            Previous
+          </Button>
+
+          <div className="flex gap-2">
+
             <Button
-              onClick={handleNextQuestion}
+              onClick={next}
+              disabled={!answeredFlags[q.questionId] || current === questions.length - 1}
               className="bg-mathpath-purple hover:bg-purple-600"
             >
-              Next Question
+              Next
             </Button>
           </div>
-        )}
-
-        <Dialog open={showHint} onOpenChange={setShowHint}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Hint</DialogTitle>
-            </DialogHeader>
-            {hint && (
-              <div className="space-y-4">
-                <div className="text-lg font-medium">{hint.question}</div>
-                <div className="space-y-2">
-                  {hint.steps.map((step, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <div className="bg-mathpath-lightPurple text-mathpath-purple rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0">
-                        {index + 1}
-                      </div>
-                      <p>{step}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="font-medium">
-                  Answer: {hint.answer}
-                </div>
-              </div>
-            )}
-            <DialogFooter>
-              <Button
-                onClick={() => setShowHint(false)}
-                className="bg-mathpath-purple hover:bg-purple-600"
-              >
-                OK
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={showQuizResults} onOpenChange={setShowQuizResults}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Quiz Results</DialogTitle>
-            </DialogHeader>
-            {quizResults && (
-              <div className="space-y-4 text-center py-4">
-                <div className={`text-5xl font-bold ${quizResults.percentage >= 70
-                    ? "text-green-500"
-                    : "text-red-500"
-                  }`}>
-                  {quizResults.percentage.toFixed(0)}%
-                </div>
-                <p>
-                  You got {quizResults.correct} out of {quizResults.total} questions correct.
-                </p>
-                <div className="py-4">
-                  {quizResults.percentage >= 70 ? (
-                    <div className="flex flex-col items-center">
-                      <div className="bg-green-100 p-4 rounded-full mb-2">
-                        <Trophy className="h-10 w-10 text-yellow-500" />
-                      </div>
-                      <p className="font-medium text-lg">Congratulations!</p>
-                      <p className="text-gray-600">
-                        You've passed this level and can now move on to the next one.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <div className="bg-red-100 p-4 rounded-full mb-2">
-                        <AlertCircle className="h-10 w-10 text-red-500" />
-                      </div>
-                      <p className="font-medium text-lg">Keep Practicing</p>
-                      <p className="text-gray-600">
-                        You need 70% to pass. Continue practicing this level.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-            <DialogFooter>
-              <Button
-                onClick={handleCloseQuizResults}
-                className="bg-mathpath-purple hover:bg-purple-600"
-              >
-                Continue Practice
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        </div>
       </main>
+
+      <Dialog open={showHint} onOpenChange={setShowHint}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Hint</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-lg font-medium">{HINT.question}</div>
+            <div className="space-y-2">
+              {HINT.steps.map((step, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <div className="bg-mathpath-lightPurple text-mathpath-purple rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0">
+                    {i + 1}
+                  </div>
+                  <p>{step}</p>
+                </div>
+              ))}
+            </div>
+            <div className="font-medium">Answer: {HINT.answer}</div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowHint(false)} className="bg-mathpath-purple hover:bg-purple-600">
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCongrats} onOpenChange={setShowCongrats}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Great Job!</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <Trophy className="h-12 w-12 text-yellow-500" />
+            <p className="text-center">
+              You’ve completed all the practice questions for this level.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowCongrats(false)} className="bg-mathpath-purple hover:bg-purple-600">
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

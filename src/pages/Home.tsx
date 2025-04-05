@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '@/components/Header';
 import { useToast } from '@/hooks/use-toast';
@@ -161,7 +161,6 @@ const Home: React.FC = () => {
     return () => window.removeEventListener('resize', calcScale);
   }, [logicalWidth]);
 
-  // curved coords (3 nodes per arc)
   const amplitude = STEP_X;
   const wavelength = 3;
 
@@ -176,6 +175,10 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-sky-100">
       <Header />
+        <Link to="/practice" className="flex fixed bottom-2 right-4 items-center gap-3 bg-mathpath-purple hover:bg-white/60 text-white hover:text-black transition-colors p-3 rounded-xl">
+                <span> Continue Your Practice</span>
+              </Link>
+      
 
       <main className="ml-64 pt-8 px-12">
         {loading ? (

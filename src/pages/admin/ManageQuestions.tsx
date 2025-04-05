@@ -35,8 +35,6 @@ interface Question {
   question_id: number;
   question_text: string;
   level_id: number;
-  sublevel_id: number | null;
-  isQuiz: boolean;
   game: string;
 
   /* optional game‑specific fields */
@@ -90,8 +88,6 @@ const ManageQuestions: React.FC = () => {
   const emptyForm: Question & { [k: string]: any } = {
     question_id: 0,
     level_id: 0,
-    isQuiz: false,
-    sublevel_id: null,
     question_text: '',
     game: '',
     colorUp_shape: '',
@@ -153,8 +149,6 @@ const ManageQuestions: React.FC = () => {
       await axios.post(`${backendUrl}/admin/questions`, {
         ...formData,
         level_id: Number(formData.level_id),
-        sublevel_id: formData.isQuiz ? null : Number(formData.sublevel_id) || null,
-        isQuiz: Boolean(formData.isQuiz),
       });
       await fetchQuestions();
       setIsAddDialogOpen(false);
@@ -231,18 +225,6 @@ const ManageQuestions: React.FC = () => {
     </select>
   );
 
-  const SublevelSelect = (
-    <select
-      value={formData.sublevel_id ? String(formData.sublevel_id) : ''}
-      onChange={(e) => setFormData({ ...formData, sublevel_id: e.target.value })}
-      className="w-full border rounded px-3 py-2"
-    >
-      <option value="">Select sub‑level</option>
-      {levels.find((l) => l.level_id === Number(formData.level_id))?.sublevels.map((s) => (
-        <option key={s.sublevel_id} value={s.sublevel_id}>{s.sublevel_discription}</option>
-      ))}
-    </select>
-  );
 
 
   return (
@@ -273,14 +255,14 @@ const ManageQuestions: React.FC = () => {
           <CardHeader><CardTitle>Question Library</CardTitle></CardHeader>
           <CardContent>
             <div className="rounded-md border">
-              <div className="grid grid-cols-12 bg-gray-100 p-3 text-sm font-medium"><div className="col-span-6">Question</div><div className="col-span-2">Level</div><div className="col-span-2">Quiz?</div><div className="col-span-2 text-right">Actions</div></div>
+              <div className="grid grid-cols-12 bg-gray-100 p-3 text-sm font-medium"><div className="col-span-6">Question</div><div className="col-span-2">Level</div><div className="col-span-2">Game</div><div className="col-span-2 text-right">Actions</div></div>
               {initialLoading ? <div className="p-8 text-center text-gray-500">Loading…</div> : filteredQuestions.length ? (
                 <div className="divide-y">
                   {filteredQuestions.map((q) => (
                     <div key={q.question_id} className="grid grid-cols-12 p-3 text-sm items-center">
                       <div className="col-span-6 truncate" title={q.question_text}>{q.question_text}</div>
                       <div className="col-span-2 text-gray-600">{levels.find((l) => l.level_id === q.level_id)?.level_name}</div>
-                      <div className="col-span-2 text-gray-600">{q.isQuiz ? 'Yes' : 'No'}</div>
+                      <div className="col-span-2 text-gray-600">{q.game }</div>
                       <div className="col-span-2 flex justify-end space-x-2">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" disabled={deleteId !== null} onClick={() => handleDelete(q.question_id)}>{deleteId === q.question_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}</Button>
                       </div>
@@ -305,36 +287,12 @@ const ManageQuestions: React.FC = () => {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Level</Label>
                 {LevelSelect}
               </div>
-              <div className="space-y-2">
-                <Label>Is Quiz Question?</Label>
-                <select
-                  value={formData.isQuiz ? 'yes' : 'no'}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      isQuiz: e.target.value === 'yes',
-                      sublevel_id: '',
-                    })
-                  }
-                  className="w-full border rounded px-3 py-2"
-                >
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-            </div>
-            { (!formData.isQuiz && formData.level_id) && (
-              <div className="space-y-2">
-                <Label>Sub‑level</Label>
-                {SublevelSelect}
-              </div>
-            )}
-
+             
+          
             <div className="space-y-2">
               <Label>Question Text</Label>
               <Input

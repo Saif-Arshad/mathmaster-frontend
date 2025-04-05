@@ -14,7 +14,6 @@ import Register from "./pages/Register";
 import VerifyOTP from "./pages/VerifyOTP";
 import InitialQuiz from "./pages/InitialQuiz";
 import Practice from "./pages/Practice";
-import QuizResults from "./pages/QuizResults";
 import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -27,7 +26,7 @@ import NewPassword from "./pages/NewPassword";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Settings from "./pages/Settings";
 import Contact from "./pages/Contact";
-import Game from "./lib/Game/Index";
+
 
 // Create a client
 const queryClient = new QueryClient();
@@ -94,12 +93,7 @@ const App: React.FC = () => {
                   <Practice />
                 </ProtectedRoute>
               } />
-              <Route path="/quiz-results" element={
-                <ProtectedRoute requireAuth={true}>
-                  <QuizResults />
-                </ProtectedRoute>
-              } />
-              
+           
               <Route path="/admin" element={
                 <ProtectedRoute requireAuth={true} requireAdmin={true}>
                   <AdminDashboard />

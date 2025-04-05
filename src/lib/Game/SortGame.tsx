@@ -1,6 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  rectSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { shapes, shapeColors } from "./shape";
 
 const getColoredSVG = (svg: string, shape: string) => {
@@ -8,6 +22,8 @@ const getColoredSVG = (svg: string, shape: string) => {
   const regex = shape === "orange" ? /fill="#CCCCCC"/g : /fill="gray"/g;
   return svg.replace(regex, `fill="${fill}"`);
 };
+
+type Item = { id: string; number: number };
 
 type Props = {
   shape: keyof typeof shapes;
@@ -17,73 +33,110 @@ type Props = {
   setIsCorrect: (v: boolean) => void;
 };
 
-export const SortGame: React.FC<Props> = ({ shape, totalItem, order, isCorrect, setIsCorrect }) => {
-  /* generate & shuffle list */
-  const make = (n: number) =>
+/* ----------  Sortable child ---------- */
+const Tile: React.FC<
+  Item & { shape: keyof typeof shapes; isCorrect: boolean }
+> = ({ id, number, shape, isCorrect }) => {
+  const {
+    setNodeRef,
+    listeners,
+    attributes,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 100 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="flex flex-col items-center"
+    >
+      <div
+        className="pointer-events-none"
+        dangerouslySetInnerHTML={{
+          __html: isCorrect
+            ? getColoredSVG(shapes[shape].uncolored, shape)
+            : shapes[shape].uncolored,
+        }}
+      />
+      <div className="h-7 w-7 p-1 mt-4 bg-mathpath-purple rounded-full flex items-center justify-center">
+        <span className="font-bold text-white">{number}</span>
+      </div>
+    </div>
+  );
+};
+
+/* ----------  Main component ---------- */
+export const SortGame: React.FC<Props> = ({
+  shape,
+  totalItem,
+  order,
+  isCorrect,
+  setIsCorrect,
+}) => {
+  const make = (n: number): Item[] =>
     Array.from({ length: n }, (_, i) => i + 1)
       .sort(() => Math.random() - 0.5)
       .map((num, i) => ({ id: `num-${i}`, number: num }));
 
-  const [items, setItems] = useState(() => make(totalItem));
+  const [items, setItems] = useState<Item[]>(() => make(totalItem));
 
   useEffect(() => {
     setItems(make(totalItem));
     setIsCorrect(false);
   }, [totalItem]);
 
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return;
-    const arr = Array.from(items);
-    const [moved] = arr.splice(result.source.index, 1);
-    arr.splice(result.destination.index, 0, moved);
-    setItems(arr);
+  /* dnd‑kit sensors */
+  const sensors = useSensors(useSensor(PointerSensor));
 
-    const sorted = arr.every((it, idx) => idx === 0 || (order === "asc" ? it.number >= arr[idx - 1].number : it.number <= arr[idx - 1].number));
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((i) => i.id === active.id);
+    const newIndex = items.findIndex((i) => i.id === over.id);
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    setItems(reordered);
+
+    const sorted = reordered.every(
+      (it, idx) =>
+        idx === 0 ||
+        (order === "asc"
+          ? it.number >= reordered[idx - 1].number
+          : it.number <= reordered[idx - 1].number)
+    );
     setIsCorrect(sorted);
   };
 
   return (
     <div className="flex flex-col items-center p-6">
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="sort" direction="horizontal">
-          {(p) => (
-            <div ref={p.innerRef} {...p.droppableProps} className="flex space-x-4">
-              {items.map((it, idx) => (
-                <Draggable key={it.id} draggableId={it.id} index={idx}>
-                  {(p, snap) => (
-                    <div
-                      ref={p.innerRef}
-                      {...p.draggableProps}
-                      {...p.dragHandleProps}
-                      style={{ ...p.draggableProps.style, zIndex: snap.isDragging ? 100 : 1 }}
-                      className="flex flex-col items-center"
-                    >
-                      {/* shape */}
-                      <>
-
-                        <div
-                          className="w-28 h-28 pointer-events-none"
-                          dangerouslySetInnerHTML={{
-                            __html: isCorrect
-                              ? getColoredSVG(shapes[shape].uncolored, shape)
-                              : shapes[shape].uncolored,
-                          }}
-                        />
-
-                        <div className="h-7 w-7 p-1 mt-12  bg-mathpath-purple rounded-full ml-10 flex items-center justify-center">
-                          <span className="font-bold text-white">{it.number}</span>
-                        </div>
-                      </>
-                    </div>
-                  )}
-                </Draggable>
-
-              ))}
-              {p.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={items} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-5 gap-4 p-4">
+            {items.map((it) => (
+              <Tile
+                key={it.id}
+                {...it}
+                shape={shape}
+                isCorrect={isCorrect}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };

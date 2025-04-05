@@ -50,7 +50,7 @@ export const shapes = {
   },
   orange: {
     uncolored: `
-      <svg width="150" height="150" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <svg width="100" height="100" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
         <g>
           <!-- Leaf -->
           <path fill="#4CAF50"
@@ -59,7 +59,7 @@ export const shapes = {
               c-23.36,23.36-32.456,54.312-25.41,78.358
               C292.454,113.144,323.406,104.04,346.766,80.68z"/>
           <!-- Body -->
-          <path fill="#CCCCCC"
+          <path  fill="gray"
             d="M256,128.904c-105.786,0-191.548,85.762-191.548,191.548
               C64.452,426.238,150.215,512,256,512
               c105.786,0,191.548-85.762,191.548-191.548
@@ -70,7 +70,7 @@ export const shapes = {
   },
   apple: {
     uncolored: `
-      <svg class="apple" width="120" height="120" viewBox="0 0 950.458 950.458">
+      <svg class="apple" width="100" height="100" viewBox="0 0 950.458 950.458">
         <g>
           <path fill="#4CAF50"
             d="M616.395,235.458c40.617-21.654,72.93-58.561,92.375-99.952c16.842-35.848,25.32-75.332,24.163-114.967
