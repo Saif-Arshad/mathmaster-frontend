@@ -5,11 +5,11 @@ import { Mail } from 'lucide-react';
 
 const Contact: React.FC = () => {
   return (
-    <div className="min-h-screen bg-sky-100">
+    <div className="min-h-screen w-full bg-sky-100">
       <Header />
-      <main className="ml-64 pt-8 px-12">
+      <main className="ml-64 pt-8 mx-auto px-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-8">Contact Us</h1>
-        <div className="bg-white p-8 rounded-xl shadow-md max-w-2xl">
+        <div className="bg-white p-8  mx-auto rounded-xl shadow-md max-w-2xl">
           <div className="flex flex-col items-center text-center space-y-6">
             <div className="bg-mathpath-purple bg-opacity-20 p-6 rounded-full">
               <Mail size={48} className="text-mathpath-purple" />
