@@ -321,9 +321,9 @@ const Practice: React.FC = () => {
 
   if (!currentQuestionData) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-sky-100">
         <Header />
-        <div className="container mx-auto px-4 py-12 text-center">
+        <div className="ml-64 pt-8 px-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">No Questions Available</h1>
           <p className="text-gray-600 mb-8">
             We're preparing more content for this level. Please check back soon!
@@ -337,10 +337,10 @@ const Practice: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-sky-100">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="ml-64 pt-8 px-12">
         <div className="mb-8 flex flex-wrap items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Practice</h1>
