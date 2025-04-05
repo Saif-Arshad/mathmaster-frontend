@@ -197,7 +197,7 @@ const Practice: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-sky-100">
+    <div className="min-h-screen bg-sky-100 w-full">
       <Header />
       {
         !questions.length ?
@@ -215,7 +215,7 @@ const Practice: React.FC = () => {
           </div>
           :
 
-          <main className="ml-64 py-8 px-12 max-w-4xl mx-auto space-y-6">
+          <main className="ml-64 py-8 px-12 mx-auto space-y-6">
             <div className="flex justify-between text-sm mb-4">
               <span>
                 <h2 className="font-semibold text-xl">Practice</h2>

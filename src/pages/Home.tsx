@@ -26,6 +26,7 @@ const LEVEL_DIAMETER = 126;
 const SUB_DIAMETER = 92;
 const STEP_Y = 160;
 const STEP_X = 600;
+const WAVELENGTH = 3;
 
 type Node = {
   id: string;
@@ -81,19 +82,18 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [scale, setScale] = useState(1);
 
-  // redirects
+  // Redirects
   useEffect(() => {
     if (!isAuthenticated) navigate('/login');
     if (user?.isAdmin) navigate('/admin');
     if (user && user.completedQuiz === false) navigate('/initial-quiz');
   }, [isAuthenticated, user, navigate]);
 
-  // fetch levels
+  // Fetch levels
   useEffect(() => {
     (async () => {
       try {
         const { data } = await axios.get(`${backendUrl}/admin/levels`);
-        console.log("🚀 ~ data:", data)
         const ordered = [...data].sort(
           (a: Level, b: Level) =>
             Number(a.level_name.split(' ')[1]) - Number(b.level_name.split(' ')[1]),
@@ -111,16 +111,14 @@ const Home: React.FC = () => {
     })();
   }, [toast]);
 
-  // build graph nodes
+  // Build graph nodes
   const nodes: Node[] = useMemo(() => {
     const out: Node[] = [];
-
     levels.forEach((lvl) => {
       const completedSubs = lvl.sublevels.filter((s) => s.isCompleted).length;
       const pct = lvl.sublevels.length
         ? (completedSubs / lvl.sublevels.length) * 100
         : 0;
-
       out.push({
         id: `level-${lvl.level_id}`,
         order: out.length,
@@ -130,7 +128,6 @@ const Home: React.FC = () => {
         progressPct: pct,
         description: lvl.discription,
       });
-
       lvl.sublevels.forEach((sub, sIdx) => {
         out.push({
           id: `sub-${sub.sublevel_id}`,
@@ -138,18 +135,17 @@ const Home: React.FC = () => {
           radius: SUB_DIAMETER / 2,
           label: `SubLevel ${sIdx + 1}`,
           isCompleted: Boolean(sub.isCompleted),
-          description: lvl.discription,
+          description: sub.sublevel_discription, // Fixed to use sublevel description
         });
       });
     });
-
     return out;
   }, [levels]);
 
   const totalHeight = nodes.length * STEP_Y + LEVEL_DIAMETER;
   const logicalWidth = STEP_X + LEVEL_DIAMETER + 80;
 
-  // responsive scale
+  // Responsive scale
   useEffect(() => {
     const calcScale = () => {
       const available = window.innerWidth - 300;
@@ -162,23 +158,59 @@ const Home: React.FC = () => {
   }, [logicalWidth]);
 
   const amplitude = STEP_X;
-  const wavelength = 3;
+  const k = Math.PI / WAVELENGTH;
 
   const coords = (n: Node) => {
     const i = n.order;
     const y = i * STEP_Y;
-    const angle = (i / wavelength) * Math.PI;
+    const angle = (i / WAVELENGTH) * Math.PI;
     const x = ((Math.sin(angle) + 1) / 2) * amplitude;
     return { x, y };
   };
 
+  const df_di = (i: number) => (amplitude / 2) * k * Math.cos(k * i);
+
+  const centers = nodes.map((n) => {
+    const { x, y } = coords(n);
+    const cx = x + n.radius;
+    const cy = totalHeight - y - n.radius;
+    return { cx, cy };
+  });
+
+  let pathData = '';
+  if (centers.length > 0) {
+    pathData = `M ${centers[0].cx} ${centers[0].cy}`;
+    for (let i = 0; i < centers.length - 1; i++) {
+      const P0 = centers[i];
+      const P3 = centers[i + 1];
+      const f_prime_i = df_di(i);
+      const f_prime_i1 = df_di(i + 1);
+      const P1 = {
+        cx: P0.cx + (1 / 3) * f_prime_i,
+        cy: P0.cy + (1 / 3) * (-STEP_Y),
+      };
+      const P2 = {
+        cx: P3.cx - (1 / 3) * f_prime_i1,
+        cy: P3.cy - (1 / 3) * (-STEP_Y),
+      };
+      pathData += ` C ${P1.cx} ${P1.cy}, ${P2.cx} ${P2.cy}, ${P3.cx} ${P3.cy}`;
+    }
+  }
+  useEffect(() => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    });
+  }, []);
   return (
     <div className="min-h-screen bg-sky-100">
       <Header />
-        <Link to="/practice" className="flex fixed bottom-2 right-4 items-center gap-3 bg-mathpath-purple hover:bg-white/60 text-white hover:text-black transition-colors p-3 rounded-xl">
-                <span> Continue Your Practice</span>
-              </Link>
-      
+      <Link
+        to="/practice"
+        className="flex fixed bottom-2 right-4 items-center gap-3 bg-mathpath-purple hover:bg-white/60 text-white hover:text-black transition-colors p-3 rounded-xl"
+      >
+        <span>Continue Your Practice</span>
+      </Link>
 
       <main className="ml-64 pt-8 px-12">
         {loading ? (
@@ -194,6 +226,18 @@ const Home: React.FC = () => {
               }}
             >
               <WaveMask />
+              <svg
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  width: logicalWidth,
+                  height: totalHeight,
+                  pointerEvents: 'none',
+                }}
+              >
+                <path d={pathData} stroke="black" strokeWidth="2" fill="none" />
+              </svg>
               {nodes.map((n) => {
                 const { x, y } = coords(n);
                 const left = x;
