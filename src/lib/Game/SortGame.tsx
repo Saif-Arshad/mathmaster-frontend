@@ -33,7 +33,6 @@ type Props = {
   setIsCorrect: (v: boolean) => void;
 };
 
-/* ----------  Sortable child ---------- */
 const Tile: React.FC<
   Item & { shape: keyof typeof shapes; isCorrect: boolean }
 > = ({ id, number, shape, isCorrect }) => {
@@ -75,9 +74,8 @@ const Tile: React.FC<
   );
 };
 
-/* ----------  Main component ---------- */
 export const SortGame: React.FC<Props> = ({
-  shape,
+  shape = "guava",
   totalItem,
   order,
   isCorrect,

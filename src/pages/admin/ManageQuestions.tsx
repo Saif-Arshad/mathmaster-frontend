@@ -36,7 +36,7 @@ interface Question {
   question_text: string;
   level_id: number;
   game: string;
-
+  isQuiz: boolean;
   /* optional game‑specific fields */
   colorUp_shape?: string;
   colorUp_totalItem?: number | string;
@@ -90,6 +90,7 @@ const ManageQuestions: React.FC = () => {
     level_id: 0,
     question_text: '',
     game: '',
+    isQuiz: false,
     colorUp_shape: '',
     colorUp_totalItem: '',
     colorUp_coloredCount: '',
@@ -106,6 +107,7 @@ const ManageQuestions: React.FC = () => {
     equation_secondBoxCount: '',
   };
   const [formData, setFormData] = useState<any>(emptyForm);
+  console.log("🚀 ~ formData:", formData)
   const resetForm = () => setFormData(emptyForm);
 
   const fetchLevels = async () => {
@@ -165,30 +167,7 @@ const ManageQuestions: React.FC = () => {
     }
   };
 
-  const handleEditQuestion = async () => {
-    if (!editingId) return;
-    setActionLoading(true);
-    try {
-      await axios.put(`${backendUrl}/admin/questions/${editingId}`, {
-        ...formData,
-        level_id: Number(formData.level_id),
-        sublevel_id: formData.isQuiz ? null : Number(formData.sublevel_id) || null,
-        isQuiz: Boolean(formData.isQuiz),
-      });
-      await fetchQuestions();
-      setIsEditDialogOpen(false);
-      setFormData(emptyForm);
-      toast({ title: 'Updated', description: 'Question saved.' });
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.response?.data?.message || 'Failed to update question',
-        variant: 'destructive',
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
+
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this question?')) return;
@@ -215,7 +194,7 @@ const ManageQuestions: React.FC = () => {
   const LevelSelect = (
     <select
       value={formData.level_id ? String(formData.level_id) : ''}
-      onChange={(e) => setFormData({ ...formData, level_id: e.target.value, sublevel_id: '', isQuiz: false })}
+      onChange={(e) => setFormData({ ...formData, level_id: e.target.value, sublevel_id: '' })}
       className="w-full border rounded px-3 py-2"
     >
       <option value="">Select level</option>
@@ -247,22 +226,33 @@ const ManageQuestions: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input placeholder="Search questions..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
-          <Button className="bg-mathpath-purple hover:bg-purple-600" onClick={() => setIsAddDialogOpen(true)} disabled={initialLoading}>
-            {actionLoading && isAddDialogOpen ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="mr-2 h-4 w-4" />}Add Question
-          </Button>
+          <div className="flex items-center gap-2">
+
+            <Button className="bg-mathpath-purple hover:bg-purple-600" onClick={() => setIsAddDialogOpen(true)} disabled={initialLoading}>
+              {actionLoading && isAddDialogOpen ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="mr-2 h-4 w-4" />}Add Question
+            </Button>
+            <Button className="bg-mathpath-purple hover:bg-purple-600" onClick={() => {
+              setIsAddDialogOpen(true);
+              setFormData({ ...emptyForm, isQuiz: true });
+            }} disabled={initialLoading}>
+              {actionLoading && isAddDialogOpen ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="mr-2 h-4 w-4" />}Add Quiz Question
+            </Button>
+          </div>
         </div>
         <Card>
           <CardHeader><CardTitle>Question Library</CardTitle></CardHeader>
           <CardContent>
             <div className="rounded-md border">
-              <div className="grid grid-cols-12 bg-gray-100 p-3 text-sm font-medium"><div className="col-span-6">Question</div><div className="col-span-2">Level</div><div className="col-span-2">Game</div><div className="col-span-2 text-right">Actions</div></div>
+              <div className="grid grid-cols-12 bg-gray-100 p-3 text-sm font-medium"><div className="col-span-4">Question</div><div className="col-span-2">Level</div><div className="col-span-2">Game</div>
+                <div className="col-span-2">is Quiz Question</div><div className="col-span-2 text-right">Actions</div></div>
               {initialLoading ? <div className="p-8 text-center text-gray-500">Loading…</div> : filteredQuestions.length ? (
                 <div className="divide-y">
-                  {filteredQuestions.map((q) => (
+                  {filteredQuestions.slice().reverse().map((q) => (
                     <div key={q.question_id} className="grid grid-cols-12 p-3 text-sm items-center">
-                      <div className="col-span-6 truncate" title={q.question_text}>{q.question_text}</div>
+                      <div className="col-span-4 truncate" title={q.question_text}>{q.question_text}</div>
                       <div className="col-span-2 text-gray-600">{levels.find((l) => l.level_id === q.level_id)?.level_name}</div>
-                      <div className="col-span-2 text-gray-600">{q.game }</div>
+                      <div className="col-span-2 text-gray-600">{q.game}</div>
+                      <div className="col-span-2 text-gray-600">{q.isQuiz ? "Yes" : "No"}</div>
                       <div className="col-span-2 flex justify-end space-x-2">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" disabled={deleteId !== null} onClick={() => handleDelete(q.question_id)}>{deleteId === q.question_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}</Button>
                       </div>
@@ -287,12 +277,12 @@ const ManageQuestions: React.FC = () => {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Level</Label>
-                {LevelSelect}
-              </div>
-             
-          
+            <div className="space-y-2">
+              <Label>Level</Label>
+              {LevelSelect}
+            </div>
+
+
             <div className="space-y-2">
               <Label>Question Text</Label>
               <Input
@@ -315,7 +305,7 @@ const ManageQuestions: React.FC = () => {
               </select>
             </div>
 
-           
+
             {formData.game === 'Color Up Game' && (
               <>
                 <div className="space-y-2">
@@ -495,7 +485,7 @@ const ManageQuestions: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-    
+
     </div>
   );
 };

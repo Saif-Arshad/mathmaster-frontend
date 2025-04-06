@@ -14,7 +14,9 @@ type Props = {
     setIsCorrect: (v: boolean) => void;
 };
 
-export const BoxGame: React.FC<Props> = ({ shape, startInBox, targetInBox, isCorrect, setIsCorrect }) => {
+export const BoxGame: React.FC<Props> = ({ shape = "guava", startInBox, targetInBox, isCorrect, setIsCorrect }) => {
+    console.log("🚀 ~ shape:", shape)
+
     const [inBox, setInBox] = useState(Array.from({ length: startInBox }, (_, i) => ({ id: `in-${i}` })));
     const [outBox, setOutBox] = useState<{ id: string }[]>([]);
 
@@ -49,11 +51,11 @@ export const BoxGame: React.FC<Props> = ({ shape, startInBox, targetInBox, isCor
     const renderItems = (arr: any[], droppableId: string) => (
         <Droppable droppableId={droppableId} direction="horizontal">
             {(p) => (
-                <div ref={p.innerRef} {...p.droppableProps} className="flex flex-wrap bg-gray-100 p-2 rounded min-h-[64px] w-48">
+                <div ref={p.innerRef} {...p.droppableProps} className="h-full grid grid-cols-4 w-full bg-gray-200 p-2 py-5 rounded-xl min-h-[64px] ">
                     {arr.map((it, idx) => (
                         <Draggable key={it.id} draggableId={it.id} index={idx}>
                             {(p) => (
-                                <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps} className="w-10 h-10 m-1" dangerouslySetInnerHTML={{ __html: droppableId === "inBox" && isCorrect ? coloredSvg : svg }} />
+                                <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps} className="  m-1" dangerouslySetInnerHTML={{ __html: droppableId === "inBox" && isCorrect ? coloredSvg : svg }} />
                             )}
                         </Draggable>
                     ))}
@@ -66,7 +68,7 @@ export const BoxGame: React.FC<Props> = ({ shape, startInBox, targetInBox, isCor
     return (
         <div className="flex flex-col items-center space-y-4">
             <DragDropContext onDragEnd={onDragEnd}>
-                <div className="flex space-x-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-4xl">
                     {renderItems(inBox, "inBox")}
                     {renderItems(outBox, "outBox")}
                 </div>

@@ -50,7 +50,7 @@ type Props = {
 };
 
 const EquationGame: React.FC<Props> = ({
-    shape,
+    shape = "guava",
     operand1,
     operand2,
     operation,
@@ -143,7 +143,7 @@ const EquationGame: React.FC<Props> = ({
 
     // read‑only bucket
     const renderStaticBucket = (count: number, colored?: boolean) => (
-        <div className="flex flex-wrap bg-white rounded-lg p-2 shadow-sm min-h-[64px] w-full sm:w-48">
+        <div className="grid grid-cols-3 gap-4 bg-gray-200 rounded-lg p-2 py-5 shadow-sm h-full min-h-[64px] w-full sm:w-56">
             {Array.from({ length: count }).map((_, i) => (
                 <ShapeIcon key={i} colored={colored} />
             ))}
