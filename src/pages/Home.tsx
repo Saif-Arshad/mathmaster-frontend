@@ -91,6 +91,7 @@ const Home: React.FC = () => {
 
   // Fetch levels
   useEffect(() => {
+    if (!user) return;
     (async () => {
       try {
         const { data } = await axios.get(`${backendUrl}/admin/levels-sublevels`,
@@ -100,6 +101,7 @@ const Home: React.FC = () => {
             }
           }
         );
+        console.log("🚀 ~ data:", data)
         const ordered = [...data].sort(
           (a: Level, b: Level) =>
             Number(a.level_name.split(' ')[1]) - Number(b.level_name.split(' ')[1]),
@@ -109,7 +111,6 @@ const Home: React.FC = () => {
         toast({
           title: 'Error',
           description: err.response?.data?.message || 'Failed to load levels',
-          variant: 'destructive',
         });
       } finally {
         setLoading(false);
