@@ -20,7 +20,6 @@ import { SortGame } from "../lib/Game/SortGame";
 import { BoxGame } from "../lib/Game/BoxGame";
 import EquationGame from "../lib/Game/DivisionGame";
 
-
 interface Question {
     questionId: number;
     question: string;
@@ -62,20 +61,24 @@ const HINT = {
 const Quiz: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [current, setCurrent] = useState(0);
-
     const [answeredFlags, setAnsweredFlags] = useState<Record<number, boolean>>({});
-
     const [showHint, setShowHint] = useState(false);
     const [error, setError] = useState("");
     const [showCongrats, setShowCongrats] = useState(false);
     const [loading, setLoading] = useState(true);
-
+const [q,setQ] = useState({} as Question)
+    console.log("🚀 ~ q:", q)
     const navigate = useNavigate();
     const { toast } = useToast();
     const { user, isAuthenticated, setUserProgress } = useAuth();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-   
+    useEffect(()=>{
+        if (questions.length > 0) {
+            setQ(questions[current])
+        }
+      
+    },[questions,current])
     useEffect(() => {
         if (!isAuthenticated) {
             navigate("/login");
@@ -87,8 +90,7 @@ const Quiz: React.FC = () => {
             setLoading(true);
             try {
                 const { data } = await axios.get(`${backendUrl}/quiz/${user.user_id}`);
-
-                console.log("🚀 ~ data:", data)
+                console.log("🚀 ~ data:", data);
                 if (!data?.questions?.length) throw new Error("No questions received");
 
                 const normalized: Question[] = data.questions.map((q: any) => ({
@@ -99,9 +101,7 @@ const Quiz: React.FC = () => {
                     difficulty: q.difficulty ?? 1,
                     sortOrder: q.sortOrder ?? q.sort_order ?? 0,
                 }));
-                
-                
-                console.log("🚀 ~ constnormalized:Question[]=data.questions.map ~ normalized:", normalized)
+                console.log("🚀 ~ constnormalized:Question[]=data.questions.map ~ normalized:", normalized);
                 setQuestions(normalized);
             } catch (err: any) {
                 setError(err.response?.data?.message || err.message);
@@ -116,8 +116,6 @@ const Quiz: React.FC = () => {
         })();
     }, [backendUrl, isAuthenticated, navigate, toast, user]);
 
-    
-    const q = questions[current] || ({} as Question);
     const correctCount = Object.values(answeredFlags).filter(Boolean).length;
     const totalAnswered = Object.keys(answeredFlags).length;
 
@@ -134,9 +132,7 @@ const Quiz: React.FC = () => {
         if (current < questions.length - 1) setCurrent((p) => p + 1);
     };
 
-    
     const handleSubmit = async () => {
-       
         setLoading(true);
         try {
             const { data } = await axios.post(`${backendUrl}/quiz/submit`, {
@@ -151,7 +147,6 @@ const Quiz: React.FC = () => {
                     description: "Level up successfully!",
                     variant: "default",
                 });
-                // Update user progress (if needed)
                 setUserProgress((prev: any) => ({
                     ...prev,
                     progress: data.progress,
@@ -168,7 +163,6 @@ const Quiz: React.FC = () => {
             setLoading(false);
         }
     };
-
 
     const renderGame = () => {
         switch (q.gameType) {
@@ -219,7 +213,6 @@ const Quiz: React.FC = () => {
         }
     };
 
- 
     if (error) {
         return (
             <div className="min-h-screen flex items-center ml-64 justify-center bg-gray-50">
@@ -307,7 +300,6 @@ const Quiz: React.FC = () => {
                             >
                                 Skip
                             </Button>
-                            {/* If user answered at least 10 correct, show "Submit" (your custom logic) */}
                             {correctCount >= 10 ? (
                                 <Button
                                     onClick={handleSubmit}
@@ -333,8 +325,8 @@ const Quiz: React.FC = () => {
                 </main>
             )}
 
-            <div className="fixed right-0 top-0 h-full w-64 p-6 bg-mathpath-purple overflow-y-auto shadow-lg">
-                <h2 className="text-xl text-white  font-bold text-center mb-4">
+            <div className="fixed right-5 rounded-xl top-20 h-[80vh] w-64 p-6 bg-mathpath-purple overflow-y-auto shadow-lg">
+                <h2 className="text-xl text-white font-bold text-center mb-4">
                     {q?.level?.level_name || "Level"} {" "} Quiz
                 </h2>
                 <div className="space-y-2">
@@ -411,10 +403,10 @@ const Quiz: React.FC = () => {
                                 >
                                     <span
                                         className={`h-2 w-2 rounded-full ${answeredFlags[question.questionId]
-                                                ? "bg-green-500"
-                                                : question.questionId in answeredFlags
-                                                    ? "bg-red-500"
-                                                    : "bg-gray-300"
+                                            ? "bg-green-500"
+                                            : question.questionId in answeredFlags
+                                                ? "bg-red-500"
+                                                : "bg-gray-300"
                                             }`}
                                     />
                                     <span>

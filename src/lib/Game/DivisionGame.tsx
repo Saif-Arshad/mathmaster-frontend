@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
     DragDropContext,
     Droppable,
@@ -7,7 +7,6 @@ import {
     DropResult,
 } from "react-beautiful-dnd";
 import { shapes, shapeColors } from "./shape";
-
 
 const colorSvg = (svg: string, shape: string, size: number) => {
     const fill = shapeColors[shape];
@@ -24,17 +23,12 @@ const graySvg = (svg: string, size: number) =>
         .replace(/width="[^"]+"/, `width="${size}px"`)
         .replace(/height="[^"]+"/, `height="${size}px"`);
 
-
 const needSecondBox = (op1: number, op: string, res: number) => {
     switch (op) {
-        case "+":
-            return res - op1;
-        case "-":
-            return op1 - res;
-        case "*":
-            return op1 === 0 ? 0 : res / op1;
-        default:
-            return 0;
+        case "+": return res - op1;
+        case "-": return op1 - res;
+        case "*": return op1 === 0 ? 0 : res / op1;
+        default: return 0;
     }
 };
 
@@ -46,7 +40,7 @@ type Props = {
     result: number;
     isCorrect: boolean;
     setIsCorrect: (v: boolean) => void;
-    shapeSize?: number; // <‑‑ NEW
+    shapeSize?: number;
 };
 
 const EquationGame: React.FC<Props> = ({
@@ -59,13 +53,26 @@ const EquationGame: React.FC<Props> = ({
     setIsCorrect,
     shapeSize = 48,
 }) => {
-  
+    console.log("Props received:", { shape, operand1, operand2, operation, result });
+
+    // Increase the number of draggable items beyond operand2 (e.g., operand2 + 2)
+    const extraItems = 2; // Add 2 extra oranges for flexibility
+    const totalSourceItems = operand2 + extraItems; // 4 + 2 = 6 oranges
+
     const [box2, setBox2] = useState<Array<{ id: string }>>([]);
     const [source, setSrc] = useState(
-        Array.from({ length: operand2 }, (_, i) => ({ id: `src-${i}` }))
+        Array.from({ length: totalSourceItems }, (_, i) => ({ id: `src-${i}` }))
     );
 
+    // Sync source state if operand2 changes (optional safeguard)
+    useEffect(() => {
+        setSrc(Array.from({ length: totalSourceItems }, (_, i) => ({ id: `src-${i}` })));
+    }, [operand2, totalSourceItems]);
+
+    console.log("Initial source length:", source.length);
+
     const goal = needSecondBox(operand1, operation, result);
+    console.log("Goal for box2:", goal);
 
     const baseSvg = useMemo(
         () => graySvg(shapes[shape].uncolored, shapeSize),
@@ -99,11 +106,13 @@ const EquationGame: React.FC<Props> = ({
             setSrc(cloneS);
             setBox2(cloneD);
             setIsCorrect(cloneD.length === goal);
+            console.log("Moved to box2, length:", cloneD.length, "Correct:", cloneD.length === goal);
         } else {
             const { cloneS, cloneD } = move(box2, source, s.index, d.index);
             setBox2(cloneS);
             setSrc(cloneD);
             setIsCorrect(cloneS.length === goal);
+            console.log("Moved to source, box2 length:", cloneS.length, "Correct:", cloneS.length === goal);
         }
     };
 
@@ -141,7 +150,6 @@ const EquationGame: React.FC<Props> = ({
         </Droppable>
     );
 
-    // read‑only bucket
     const renderStaticBucket = (count: number, colored?: boolean) => (
         <div className="grid grid-cols-3 gap-4 bg-gray-200 rounded-lg p-2 py-5 shadow-sm h-full min-h-[64px] w-full sm:w-56">
             {Array.from({ length: count }).map((_, i) => (
@@ -154,13 +162,12 @@ const EquationGame: React.FC<Props> = ({
         <div className="flex flex-col items-center space-y-6 p-4 w-full max-w-3xl mx-auto">
             <DragDropContext onDragEnd={onDragEnd}>
                 {renderBucket(source, "src")}
-
                 <div className="flex items-center justify-center flex-wrap gap-2 text-3xl font-bold mt-4 w-full">
-                    {renderStaticBucket(operand1)} 
+                    {renderStaticBucket(operand1)}
                     <div> {operation} </div>
-                    {renderBucket(box2, "box2")} 
+                    {renderBucket(box2, "box2")}
                     <div>=</div>
-                    {renderStaticBucket(result, isCorrect)} 
+                    {renderStaticBucket(result, isCorrect)}
                 </div>
             </DragDropContext>
         </div>

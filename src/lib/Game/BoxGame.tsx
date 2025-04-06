@@ -15,7 +15,7 @@ type Props = {
 };
 
 export const BoxGame: React.FC<Props> = ({ shape = "guava", startInBox, targetInBox, isCorrect, setIsCorrect }) => {
-    console.log("🚀 ~ shape:", shape)
+    console.log("🚀 ~ shape:", targetInBox)
 
     const [inBox, setInBox] = useState(Array.from({ length: startInBox }, (_, i) => ({ id: `in-${i}` })));
     const [outBox, setOutBox] = useState<{ id: string }[]>([]);
@@ -32,16 +32,18 @@ export const BoxGame: React.FC<Props> = ({ shape = "guava", startInBox, targetIn
         if (!r.destination) return;
         const { source, destination } = r;
 
-        if (source.droppableId === destination.droppableId) return; // no reorder needed
+        if (source.droppableId === destination.droppableId) return; // No reorder needed
 
         if (source.droppableId === "inBox") {
             const { cloneSrc, cloneDst } = move(inBox, outBox, source.index, destination.index);
-            setInBox(cloneSrc); setOutBox(cloneDst);
-            setIsCorrect(cloneSrc.length === targetInBox);
+            setInBox(cloneSrc);
+            setOutBox(cloneDst);
+            setIsCorrect(cloneDst.length === targetInBox); 
         } else {
             const { cloneSrc, cloneDst } = move(outBox, inBox, source.index, destination.index);
-            setOutBox(cloneSrc); setInBox(cloneDst);
-            setIsCorrect(cloneDst.length === targetInBox);
+            setOutBox(cloneSrc);
+            setInBox(cloneDst);
+            setIsCorrect(cloneSrc.length === targetInBox);
         }
     };
 
