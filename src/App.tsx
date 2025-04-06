@@ -26,6 +26,7 @@ import NewPassword from "./pages/NewPassword";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Settings from "./pages/Settings";
 import Contact from "./pages/Contact";
+import Quiz from "./pages/Quiz";
 
 
 // Create a client
@@ -45,7 +46,7 @@ const App: React.FC = () => {
                   <Login />
                 </ProtectedRoute>
               } />
-            
+
               <Route path="/register" element={
                 <ProtectedRoute requireUnauth={true}>
                   <Register />
@@ -71,13 +72,13 @@ const App: React.FC = () => {
                   <NewPassword />
                 </ProtectedRoute>
               } />
-              
+
               <Route path="/" element={
                 <ProtectedRoute requireAuth={true}>
                   <Home />
                 </ProtectedRoute>
               } />
-         
+
               <Route path="/contact" element={
                 <ProtectedRoute requireAuth={true}>
                   <Contact />
@@ -93,7 +94,12 @@ const App: React.FC = () => {
                   <Practice />
                 </ProtectedRoute>
               } />
-           
+              <Route path="/quiz" element={
+                <ProtectedRoute requireAuth={true}>
+                  <Quiz />
+                </ProtectedRoute>
+              } />
+
               <Route path="/admin" element={
                 <ProtectedRoute requireAuth={true} requireAdmin={true}>
                   <AdminDashboard />
@@ -124,9 +130,9 @@ const App: React.FC = () => {
                   <UserDetails />
                 </ProtectedRoute>
               } />
-            
-          
-              
+
+
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

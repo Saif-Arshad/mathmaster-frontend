@@ -62,16 +62,18 @@ const HINT = {
 const Practice: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [current, setCurrent] = useState(0);
-  // answeredFlags stores whether a question was answered (true if correct, false if skipped/wrong)
   const [answeredFlags, setAnsweredFlags] = useState<Record<number, boolean>>({});
   const [showHint, setShowHint] = useState(false);
+  const [error, setError] = useState("");
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
+  const [showisLastSublevel, setisLastSublevel] = useState(false);
   const [showCongrats, setShowCongrats] = useState(false);
   // const [isLevelUpQuestion,setIslevelUp] = useState(false);
-
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [currentUserData, setCurrentUserData] = useState<any>(null);
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, setUserProgress, userProgress } = useAuth();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
@@ -82,13 +84,17 @@ const Practice: React.FC = () => {
     if (!user) return;
 
     (async () => {
+      setLoading(true);
       try {
         const { data } = await axios.get(
           `${backendUrl}/admin/questions/${user.user_id}`
         );
 
         if (!data?.questions?.length) throw new Error("No questions received");
-
+        console.log(data.user
+        )
+        setCurrentUserData(data?.user);
+        setisLastSublevel(data.user.isLastSublevel)
         const normalised: Question[] = data.questions.map((q: any) => ({
           ...q,
           questionId: q.question_id,
@@ -102,11 +108,14 @@ const Practice: React.FC = () => {
 
         setQuestions(normalised);
       } catch (err: any) {
+        setError(err.response?.data?.message || err.message,)
         toast({
           title: "Error",
           description: err.response?.data?.message || err.message,
           variant: "destructive",
         });
+      } finally {
+        setLoading(false);
       }
     })();
   }, [backendUrl, isAuthenticated, navigate, toast, user]);
@@ -136,14 +145,49 @@ const Practice: React.FC = () => {
 
 
 
-  const handleSubmit = () => {
+  const continueLevelUp = () => {
     setShowLevelUpModal(true);
   };
 
-  const continueLevelUp = () => {
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/admin/questions/submit`,
+        {
+          user_id: user?.user_id,
+          level_id: q.level.level_id,
+          correct_answers: 5,
+          total_questions: current + 1,
+        }
+      );
+      if (data) {
+        console.log("🚀 ~ continueLevelUp ~ data:", data)
 
-    setShowLevelUpModal(false);
-    if (current < questions.length - 1) next();
+        toast({
+          title: "Success",
+          description: "Level up successfully!",
+          variant: "default",
+        });
+        setUserProgress((prev: any) => ({
+          ...prev,
+          progress: data.progress,
+        }));
+        setisLastSublevel(data.isLastSubLevel)
+        setShowLevelUpModal(false);
+        if (current < questions.length - 1) next();
+      }
+    }
+    catch (e: any) {
+      toast({
+        title: "Error",
+        description: e.response?.data?.message || e.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+
   };
 
   const renderGame = () => {
@@ -195,13 +239,27 @@ const Practice: React.FC = () => {
     }
   };
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center ml-64 justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-pulse">
+            <div className="w-16 h-16 mx-auto bg-mathpath-purple rounded-full flex items-center justify-center mb-4">
+              <HelpCircle className="h-8 w-8 text-white" />
+            </div>
+          </div>
+          <h2 className="text-xl font-medium text-gray-700">{error}</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-sky-100 w-full">
       <Header />
       {
-        !questions.length ?
-          <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        loading ?
+          <div className="min-h-screen flex items-center ml-64 justify-center bg-gray-50">
             <div className="text-center">
               <div className="animate-pulse">
                 <div className="w-16 h-16 mx-auto bg-mathpath-purple rounded-full flex items-center justify-center mb-4">
@@ -210,78 +268,99 @@ const Practice: React.FC = () => {
                   </svg>
                 </div>
               </div>
-              <h2 className="text-xl font-medium text-gray-700">Fetching Questions...</h2>
+              <h2 className="text-xl font-medium text-gray-700">Loading...</h2>
             </div>
           </div>
           :
-
-          <main className="ml-64 py-8 px-12 mx-auto space-y-6">
-            <div className="flex justify-between text-sm mb-4">
-              <span>
-                <h2 className="font-semibold text-xl">Practice</h2>
-                {/* Updated sub-level calculation */}
-                <p>
-                  {q.level.level_name} – SubLevel {Math.floor(correctCount / 5) + 1}
+          showisLastSublevel ?
+            <div className="min-h-screen flex ml-64 flex-col items-center justify-center">
+              <div className="text-center space-y-6">
+                <Trophy className="h-24 w-24 text-yellow-500 mx-auto animate-bounce" />
+                <h1 className="text-4xl font-bold text-mathpath-purple">
+                  Congratulations! 🎉
+                </h1>
+                <p className="text-xl text-gray-600">
+                  You've successfully completed all practice questions for this level.
                 </p>
-              </span>
-              <span>
-                {correctCount} correct out of {totalAnswered} answered
-              </span>
-            </div>
-
-            <Card>
-              <CardContent className="p-6 pb-20 space-y-6">
-                <div className="flex justify-end ">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowHint(true)}
-                    className="text-mathpath-purple border-mathpath-purple hover:bg-mathpath-lightPurple"
-                  >
-                    <Lightbulb className="h-5 w-5" />
-                    Hint
-                  </Button>
-                </div>
-
-                <h2 className="text-xl font-semibold text-start capitalize">{q.question}</h2>
-                {renderGame()}
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={prev} disabled={current === 0}>
-                Previous
-              </Button>
-
-              <div className="flex gap-2">
-                {/* New Skip button */}
+                <p className="text-lg text-gray-500">
+                  Ready to test your knowledge? Take the quiz to advance to the next level!
+                </p>
                 <Button
-                  onClick={skipQuestion}
-                  disabled={current === questions.length - 1}
-                  variant="outline"
-                  className="bg-gray-300 hover:bg-gray-400"
+                  onClick={() => navigate('/quiz')}
+                  className="bg-mathpath-purple hover:bg-purple-600 text-white px-8 py-4 text-lg"
                 >
-                  Skip
+                  Take the Quiz
                 </Button>
-                {isLevelUpQuestion ? (
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!(q.questionId in answeredFlags)}
-                    className="bg-mathpath-purple hover:bg-purple-600"
-                  >
-                    Submit
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={next}
-                    disabled={!(q.questionId in answeredFlags) || current === questions.length - 1}
-                    className="bg-mathpath-purple hover:bg-purple-600"
-                  >
-                    Next
-                  </Button>
-                )}
               </div>
             </div>
-          </main>
+            :
+            <main className="ml-64 py-8 px-12 mx-auto space-y-6">
+              <div className="flex justify-between text-sm mb-4">
+                <span>
+                  <h2 className="font-semibold text-xl">Practice</h2>
+                  <p>
+                    {q.level.level_name}
+
+                  </p>
+                </span>
+                <span>
+                  {correctCount} correct out of {totalAnswered} answered
+                </span>
+              </div>
+
+              <Card>
+                <CardContent className="p-6 pb-20 space-y-6">
+                  <div className="flex justify-end ">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowHint(true)}
+                      className="text-mathpath-purple border-mathpath-purple hover:bg-mathpath-lightPurple"
+                    >
+                      <Lightbulb className="h-5 w-5" />
+                      Hint
+                    </Button>
+                  </div>
+
+                  <h2 className="text-xl font-semibold text-start capitalize">{q.question}</h2>
+                  {renderGame()}
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={prev} disabled={current === 0}>
+                  Previous
+                </Button>
+
+                <div className="flex gap-2">
+                  {/* New Skip button */}
+                  <Button
+                    onClick={skipQuestion}
+                    disabled={current === questions.length - 1}
+                    variant="outline"
+                    className="bg-gray-300 hover:bg-gray-400"
+                  >
+                    Skip
+                  </Button>
+                  {isLevelUpQuestion ? (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={!(q.questionId in answeredFlags)}
+                      className="bg-mathpath-purple hover:bg-purple-600"
+                    >
+                      Submit
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={next}
+                      disabled={!(q.questionId in answeredFlags) || current === questions.length - 1}
+                      className="bg-mathpath-purple hover:bg-purple-600"
+                    >
+                      Next
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </main>
       }
 
       <Dialog open={showHint} onOpenChange={setShowHint}>

@@ -93,7 +93,13 @@ const Home: React.FC = () => {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axios.get(`${backendUrl}/admin/levels`);
+        const { data } = await axios.get(`${backendUrl}/admin/levels-sublevels`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`
+            }
+          }
+        );
         const ordered = [...data].sort(
           (a: Level, b: Level) =>
             Number(a.level_name.split(' ')[1]) - Number(b.level_name.split(' ')[1]),
@@ -135,7 +141,7 @@ const Home: React.FC = () => {
           radius: SUB_DIAMETER / 2,
           label: `SubLevel ${sIdx + 1}`,
           isCompleted: Boolean(sub.isCompleted),
-          description: sub.sublevel_discription, // Fixed to use sublevel description
+          description: lvl.discription,
         });
       });
     });
@@ -145,7 +151,6 @@ const Home: React.FC = () => {
   const totalHeight = nodes.length * STEP_Y + LEVEL_DIAMETER;
   const logicalWidth = STEP_X + LEVEL_DIAMETER + 80;
 
-  // Responsive scale
   useEffect(() => {
     const calcScale = () => {
       const available = window.innerWidth - 300;
@@ -197,11 +202,14 @@ const Home: React.FC = () => {
     }
   }
   useEffect(() => {
-    window.scrollTo({
-      top: document.body.scrollHeight,
-      behavior: 'smooth'
-    });
-  }, []);
+    if (levels) {
+
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [levels]);
   return (
     <div className="min-h-screen bg-sky-100">
       <Header />
@@ -236,7 +244,7 @@ const Home: React.FC = () => {
                   pointerEvents: 'none',
                 }}
               >
-                <path d={pathData} stroke="black" strokeWidth="2" fill="none" />
+                <path d={pathData} stroke="#ec4899" strokeWidth="5" fill="none" />
               </svg>
               {nodes.map((n) => {
                 const { x, y } = coords(n);
@@ -251,12 +259,13 @@ const Home: React.FC = () => {
                 const progressStyle =
                   isLevel && !n.isCompleted && n.progressPct
                     ? {
-                      backgroundImage: 'linear-gradient(#ec4899 0 0)',
-                      backgroundSize: `100% ${n.progressPct}%`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: `0 ${100 - n.progressPct}%`,
-                      clipPath: 'url(#wave)',
+                      backgroundImage:
+                        'linear-gradient( #ff7f00, #ffff00)',
                       transition: 'background-position 0.6s ease-in-out',
+                      // backgroundSize: `100% ${n.progressPct}%`,
+                      // backgroundRepeat: 'no-repeat',
+                      backgroundPosition: `0 ${100 - n.progressPct}%`,
+                      // clipPath: 'url(#wave)',
                     }
                     : {};
 
