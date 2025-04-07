@@ -14,35 +14,13 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import axios from 'axios';
 
-const sampleUserDetails = {
-  id: '1',
-  name: 'Alex Smith',
-  email: 'alex@example.com',
-  age: 8,
-  level: 2,
-  status: 'active',
-  joinDate: '2023-09-15',
-  quizzesTaken: 5,
-  lastLogin: '2023-10-25',
-  parentName: 'Jane Smith',
-  parentEmail: 'jane@example.com',
-  phoneNumber: '(555) 123-4567',
-  recentActivity: [
-    { date: '2023-10-25', activity: 'Completed practice session', result: 'Solved 8/10 questions' },
-    { date: '2023-10-23', activity: 'Took level 2 quiz', result: 'Passed with 85%' },
-    { date: '2023-10-20', activity: 'Completed practice session', result: 'Solved 7/10 questions' },
-  ],
-  quizHistory: [
-    { date: '2023-10-23', level: 2, score: '85%', passed: true },
-    { date: '2023-10-15', level: 2, score: '65%', passed: false },
-    { date: '2023-10-10', level: 1, score: '90%', passed: true },
-  ]
-};
+
 
 const UserDetails: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>()
+  const [loading, setLoading] = useState(false)
   const { toast } = useToast();
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const getUser = async () => {
@@ -64,25 +42,29 @@ const UserDetails: React.FC = () => {
     }
   }, [userId])
 
-  const userDetails = sampleUserDetails;
-
-  const handleAction = (action: string) => {
-    switch (action) {
-      case 'email':
-        setIsEmailDialogOpen(true);
-        break;
-      case 'block':
-        toast({
-          title: userDetails.status === 'active' ? "User blocked" : "User unblocked",
-          description: `${userDetails.name} has been ${userDetails.status === 'active' ? 'blocked' : 'unblocked'} successfully.`,
-        });
-        break;
-
-        break;
-      default:
-        break;
+  const downloadUserReport = async () => {
+    setLoading(true);
+    try {
+      const user_id = userId
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/user/report/${user_id}`,
+        { responseType: "blob" }
+      );
+      console.log("🚀 ~ downloadUserReport ~ res:", res.data)
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `user_report_${userId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("🚀 ~ downloadUserReport ~ error:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -121,7 +103,7 @@ const UserDetails: React.FC = () => {
                       <h3 className="text-lg font-bold">{user.username}</h3>
                       <p className="text-sm text-gray-500">{user.email}</p>
                       <Badge className={!user.is_blocked ? 'bg-green-500 mt-2' : 'bg-red-500 mt-2'}>
-                        {userDetails.status === 'active' ? 'Active' : 'Blocked'}
+                      { !user.is_blocked ? 'Active' : 'Blocked'}
                       </Badge>
                     </div>
 
@@ -139,7 +121,14 @@ const UserDetails: React.FC = () => {
 
                     <div className="mt-6 space-y-2">
 
-
+                      <button
+                        onClick={downloadUserReport}
+                      className="bg-mathpath-purple w-full text-white p-2 rounded">
+                       {
+                          loading ? "Loading" :"   User Report"
+                       }
+                     
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
@@ -178,10 +167,10 @@ const UserDetails: React.FC = () => {
                                   {quiz.correct_answers}/{quiz.total_questions} correct
                                 </TableCell>
                                 <TableCell>
-                                  <Badge 
+                                  <Badge
                                     className={
-                                      quiz.quiz_score >= quiz.level.min_passing_percentage 
-                                        ? 'bg-green-500' 
+                                      quiz.quiz_score >= quiz.level.min_passing_percentage
+                                        ? 'bg-green-500'
                                         : 'bg-red-500'
                                     }
                                   >
@@ -225,59 +214,7 @@ const UserDetails: React.FC = () => {
             </div>
         }
 
-        <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Send Email</DialogTitle>
-            </DialogHeader>
-
-            <form className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="recipient">To</Label>
-                <Input
-                  id="recipient"
-                  value={userDetails.email}
-                  readOnly
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="subject">Subject</Label>
-                <Input id="subject" placeholder="Email subject" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <textarea
-                  id="message"
-                  className="w-full min-h-[100px] p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-mathpath-purple"
-                  placeholder="Your message here..."
-                />
-              </div>
-            </form>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsEmailDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="bg-mathpath-purple hover:bg-purple-600"
-                onClick={() => {
-                  setIsEmailDialogOpen(false);
-                  toast({
-                    title: "Email sent",
-                    description: `Your email has been sent to ${userDetails.name}.`,
-                  });
-                }}
-              >
-                Send Email
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+     
       </main>
     </div>
   );
