@@ -89,11 +89,13 @@ export const SortGame: React.FC<Props> = ({
       .map((num, i) => ({ id: `num-${i}`, number: num }));
 
   const [items, setItems] = useState<Item[]>(() => make(totalItem));
+  const [sortOrder, setSortOrder] = useState<any>(order);
 
   useEffect(() => {
     setItems(make(totalItem));
     setIsCorrect(false);
-  }, [totalItem, id]);
+    setSortOrder(order)
+  }, [totalItem, id, order]);
 
   /* dnd‑kit sensors */
   const sensors = useSensors(useSensor(PointerSensor));
@@ -110,10 +112,11 @@ export const SortGame: React.FC<Props> = ({
     const sorted = reordered.every(
       (it, idx) =>
         idx === 0 ||
-        (order === "asc"
+        (sortOrder === "asc"
           ? it.number >= reordered[idx - 1].number
           : it.number <= reordered[idx - 1].number)
     );
+    console.log("🚀 ~ handleDragEnd ~ sorted:", sorted)
     setIsCorrect(sorted);
   };
 

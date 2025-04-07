@@ -16,8 +16,8 @@ type Props = {
 
 export const ColorUpGame: React.FC<Props> = ({
   shape = "guava",
-  totalItems=5,
-  colorCount=1,
+  totalItems = 5,
+  colorCount = 1,
   isCorrect,
   id,
   setIsCorrect
@@ -29,10 +29,13 @@ export const ColorUpGame: React.FC<Props> = ({
 
   useEffect(() => {
     setColored(Array(totalItems).fill(false));
-  }, [id]);
+  }, [id, colorCount, totalItems]);
 
   const toggle = (idx: number) => {
+    console.log("🚀 ~ toggle ~ idx:", idx)
     const arr = [...colored];
+    console.log("🚀 ~ toggle ~ arr:", arr)
+    console.log("🚀 ~ toggle ~ arr:", colorCount)
     arr[idx] = !arr[idx];
     setColored(arr);
     setIsCorrect(arr.filter(Boolean).length === colorCount);

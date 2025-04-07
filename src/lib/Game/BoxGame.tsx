@@ -17,14 +17,17 @@ type Props = {
 
 export const BoxGame: React.FC<Props> = ({ shape = "guava", id, startInBox, targetInBox, isCorrect, setIsCorrect }) => {
     console.log("🚀 ~ shape:", targetInBox)
+    console.log("🚀 ~ shape:", startInBox)
 
     const [inBox, setInBox] = useState(Array.from({ length: startInBox }, (_, i) => ({ id: `in-${i}` })));
     const [outBox, setOutBox] = useState<{ id: string }[]>([]);
+    console.log("🚀 ~ inBox:", inBox)
 
 
     useEffect(() => {
         setOutBox([])
-    }, [id])
+        setInBox(Array.from({ length: startInBox }, (_, i) => ({ id: `in-${i}` })))
+    }, [id, startInBox])
     const move = (src: any[], dst: any[], sIdx: number, dIdx: number) => {
         const cloneSrc = Array.from(src);
         const cloneDst = Array.from(dst);
