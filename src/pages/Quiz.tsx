@@ -50,16 +50,17 @@ interface Question {
     };
 }
 
-
 const Quiz: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [current, setCurrent] = useState(0);
+    const [currentLevel, setCurrentLevel] = useState<any>();
     const [answeredFlags, setAnsweredFlags] = useState<Record<number, boolean>>({});
     const [error, setError] = useState("");
     const [showCongrats, setShowCongrats] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [q, setQ] = useState({} as Question)
-    console.log("🚀 ~ q:", q)
+    const [q, setQ] = useState({} as Question);
+    const [quizResult, setQuizResult] = useState(""); // New state to store pass/fail result
+
     const navigate = useNavigate();
     const { toast } = useToast();
     const { user, isAuthenticated, setUserProgress } = useAuth();
@@ -67,10 +68,10 @@ const Quiz: React.FC = () => {
 
     useEffect(() => {
         if (questions.length > 0) {
-            setQ(questions[current])
+            setQ(questions[current]);
         }
+    }, [questions, current]);
 
-    }, [questions, current])
     useEffect(() => {
         if (!isAuthenticated) {
             navigate("/login");
@@ -82,9 +83,8 @@ const Quiz: React.FC = () => {
             setLoading(true);
             try {
                 const { data } = await axios.get(`${backendUrl}/quiz/${user.user_id}`);
-                console.log("🚀 ~ data:", data);
                 if (!data?.questions?.length) throw new Error("No questions received");
-
+                setCurrentLevel(data.level);
                 const normalized: Question[] = data.questions.map((q: any) => ({
                     ...q,
                     questionId: q.question_id,
@@ -93,7 +93,6 @@ const Quiz: React.FC = () => {
                     difficulty: q.difficulty ?? 1,
                     sortOrder: q.sortOrder ?? q.sort_order ?? 0,
                 }));
-                console.log("🚀 ~ constnormalized:Question[]=data.questions.map ~ normalized:", normalized);
                 setQuestions(normalized);
             } catch (err: any) {
                 setError(err.response?.data?.message || err.message);
@@ -113,10 +112,15 @@ const Quiz: React.FC = () => {
 
     const setIsCorrect = (val: boolean) => {
         setAnsweredFlags((prev) => ({ ...prev, [q.questionId]: val }));
-        if (current === questions.length - 1 && val) setShowCongrats(true);
     };
 
-    const next = () => setCurrent((p) => p + 1);
+    const next = () => {
+        if (current === questions.length - 1) {
+            handleSubmit();
+        } else {
+            setCurrent((p) => p + 1);
+        }
+    };
     const prev = () => setCurrent((p) => p - 1);
 
     const skipQuestion = () => {
@@ -131,18 +135,20 @@ const Quiz: React.FC = () => {
                 user_id: user?.user_id,
                 level_id: q.level.level_id,
                 correct_answers: correctCount,
-                total_questions: questions.length,
+                total_questions: current + 1,
             });
             if (data) {
+                console.log("🚀 ~ handleSubmit ~ data:", data)
                 toast({
-                    title: "Success",
-                    description: "Level up successfully!",
+                    title: "Quiz Submitted",
+                    description: data.message,
                     variant: "default",
                 });
                 setUserProgress((prev: any) => ({
                     ...prev,
                     progress: data.progress,
                 }));
+                setQuizResult(data.result); // Store the pass/fail result from backend
                 setShowCongrats(true);
             }
         } catch (e: any) {
@@ -162,7 +168,6 @@ const Quiz: React.FC = () => {
                 return (
                     <ColorUpGame
                         id={q.question_id!}
-
                         shape={q.colorUp_shape as any}
                         totalItems={q.colorUp_totalItem!}
                         colorCount={q.colorUp_coloredCount!}
@@ -174,7 +179,6 @@ const Quiz: React.FC = () => {
                 return (
                     <SortGame
                         id={q.question_id!}
-
                         shape={q.sort_shape as any}
                         totalItem={q.sort_totalItem!}
                         order={q.sort_order as any}
@@ -186,7 +190,6 @@ const Quiz: React.FC = () => {
                 return (
                     <BoxGame
                         id={q.question_id!}
-
                         shape={q.box_shape as any}
                         startInBox={q.box_firstBoxCount!}
                         targetInBox={q.box_secondBoxCount!}
@@ -198,7 +201,6 @@ const Quiz: React.FC = () => {
                 return (
                     <EquationGame
                         id={q.question_id!}
-
                         shape={q.equation_shape as any}
                         operand1={q.equation_firstBoxCount!}
                         operand2={q.equation_secondBoxCount!}
@@ -261,27 +263,19 @@ const Quiz: React.FC = () => {
                                 {q?.level?.level_name} Quiz
                             </h2>
                         </span>
-                        <span>
-                            {correctCount} correct out of {totalAnswered} answered
-                        </span>
                     </div>
-
                     <Card>
                         <CardContent className="p-6 pb-20 space-y-6">
-
-
                             <h2 className="text-xl font-semibold text-start capitalize">
                                 {q.question}
                             </h2>
                             {renderGame()}
                         </CardContent>
                     </Card>
-
                     <div className="flex justify-between">
                         <Button variant="outline" onClick={prev} disabled={current === 0}>
                             Previous
                         </Button>
-
                         <div className="flex gap-2">
                             <Button
                                 onClick={skipQuestion}
@@ -302,10 +296,6 @@ const Quiz: React.FC = () => {
                             ) : (
                                 <Button
                                     onClick={next}
-                                    disabled={
-                                        !(q.questionId in answeredFlags) ||
-                                        current === questions.length - 1
-                                    }
                                     className="bg-mathpath-purple hover:bg-purple-600"
                                 >
                                     Next
@@ -318,7 +308,7 @@ const Quiz: React.FC = () => {
 
             <div className="fixed right-5 rounded-xl top-20 h-[80vh] w-64 p-6 bg-mathpath-purple overflow-y-auto shadow-lg">
                 <h2 className="text-xl text-white font-bold text-center mb-4">
-                    {q?.level?.level_name || "Level"} {" "} Quiz
+                    {q?.level?.level_name || "Level"} Quiz
                 </h2>
                 <div className="space-y-2">
                     {questions.map((question, index) => {
@@ -337,8 +327,6 @@ const Quiz: React.FC = () => {
                 </div>
             </div>
 
-
-
             <Dialog open={showCongrats} onOpenChange={setShowCongrats}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
@@ -354,6 +342,9 @@ const Quiz: React.FC = () => {
                         </p>
                         <p className="text-lg font-semibold">
                             Score: {Math.round((correctCount / totalAnswered) * 100)}%
+                        </p>
+                        <p className="text-lg font-semibold">
+                            Result: {quizResult.toUpperCase()}
                         </p>
                     </div>
                     <div className="w-full">
