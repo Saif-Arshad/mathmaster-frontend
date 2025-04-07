@@ -108,7 +108,7 @@ const ManageUsers: React.FC = () => {
       if (user.is_blocked) {
         const res = await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/admin/unblock-user/${user.user_id}`);
         if (res.data) {
-       
+
           toast({
             title: newStatus === 'active' ? "User unblocked" : "User blocked",
             description: `${user?.username} has been ${newStatus === 'active' ? 'unblocked' : 'blocked'} successfully.`,
@@ -214,7 +214,7 @@ const ManageUsers: React.FC = () => {
                       <div className="col-span-3 font-medium capitalize">{user.username}</div>
                       <div className="col-span-3 text-gray-600">{user.email}</div>
                       <div className="col-span-1 text-gray-600">{user.age}</div>
-                      <div className="col-span-1 text-gray-600">1</div>
+                      <div className="col-span-1 text-gray-600">{user.currentLevel ? user.currentLevel : "Level 1"}</div>
                       <div className="col-span-1">
                         <Badge className={!user.is_blocked ? 'bg-green-500' : 'bg-red-500'}>
                           {!user.is_blocked ? 'Active' : 'Blocked'}

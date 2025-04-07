@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { shapes, shapeColors } from "./shape";
 
 const getColoredSVG2 = (svg: string, shape: string) => svg.replace(/fill="gray"/g, `fill="${shapeColors[shape]}"`);
@@ -13,6 +13,9 @@ type Props = {
 
 export const ColorUpGame: React.FC<Props> = ({ shape ="guava", totalItems, colorCount, isCorrect, setIsCorrect }) => {
   const [colored, setColored] = useState(Array(totalItems).fill(false));
+  useEffect(() => {
+    setColored(Array(totalItems).fill(false));
+  }, [totalItems]);
   const toggle = (idx: number) => {
     const arr = [...colored];
     arr[idx] = !arr[idx];

@@ -20,6 +20,7 @@ import { ColorUpGame } from "../lib/Game/ColorUpGame";
 import { SortGame } from "../lib/Game/SortGame";
 import { BoxGame } from "../lib/Game/BoxGame";
 import EquationGame from "../lib/Game/DivisionGame";
+import Hint from "@/lib/Game/hint";
 
 interface Question {
   questionId: number;
@@ -75,7 +76,13 @@ const Practice: React.FC = () => {
   const { toast } = useToast();
   const { user, isAuthenticated, setUserProgress, userProgress } = useAuth();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+   const [q, setQ] = useState({} as Question)
+    useEffect(() => {
+        if (questions.length > 0) {
+            setQ(questions[current])
+        }
 
+    }, [questions, current])
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -120,7 +127,6 @@ const Practice: React.FC = () => {
     })();
   }, [backendUrl, isAuthenticated, navigate, toast, user]);
 
-  const q = questions[current];
   const correctCount = Object.values(answeredFlags).filter(Boolean).length;
   const isLevelUpQuestion = q &&
     (q.questionId in answeredFlags) &&
@@ -299,8 +305,7 @@ const Practice: React.FC = () => {
                 <span>
                   <h2 className="font-semibold text-xl">Practice</h2>
                   <p>
-                    {q.level.level_name}
-
+                    {q?.level?.level_name}
                   </p>
                 </span>
                 <span>
@@ -311,14 +316,7 @@ const Practice: React.FC = () => {
               <Card>
                 <CardContent className="p-6 pb-20 space-y-6">
                   <div className="flex justify-end ">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowHint(true)}
-                      className="text-mathpath-purple border-mathpath-purple hover:bg-mathpath-lightPurple"
-                    >
-                      <Lightbulb className="h-5 w-5" />
-                      Hint
-                    </Button>
+                    <Hint gameType={q.gameType} />
                   </div>
 
                   <h2 className="text-xl font-semibold text-start capitalize">{q.question}</h2>

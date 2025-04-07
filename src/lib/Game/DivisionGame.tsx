@@ -55,19 +55,20 @@ const EquationGame: React.FC<Props> = ({
 }) => {
     console.log("Props received:", { shape, operand1, operand2, operation, result });
 
-    // Increase the number of draggable items beyond operand2 (e.g., operand2 + 2)
-    const extraItems = 2; // Add 2 extra oranges for flexibility
-    const totalSourceItems = operand2 + extraItems; // 4 + 2 = 6 oranges
+    const extraItems = 2; 
+    const totalSourceItems = operand2 + extraItems;
 
     const [box2, setBox2] = useState<Array<{ id: string }>>([]);
     const [source, setSrc] = useState(
         Array.from({ length: totalSourceItems }, (_, i) => ({ id: `src-${i}` }))
     );
 
-    // Sync source state if operand2 changes (optional safeguard)
     useEffect(() => {
         setSrc(Array.from({ length: totalSourceItems }, (_, i) => ({ id: `src-${i}` })));
-    }, [operand2, totalSourceItems]);
+        setBox2([]);
+        setIsCorrect(false);
+    }, [operand1, operand2, operation, result, totalSourceItems]);
+
 
     console.log("Initial source length:", source.length);
 

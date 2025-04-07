@@ -170,7 +170,7 @@ const ManageQuestions: React.FC = () => {
 
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this question?')) return;
+    // if (!window.confirm('Delete this question?')) return;
     setDeleteId(id);
     try {
       await axios.delete(`${backendUrl}/admin/questions/${id}`);

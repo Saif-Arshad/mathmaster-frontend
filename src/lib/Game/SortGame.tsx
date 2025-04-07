@@ -19,7 +19,7 @@ import { shapes, shapeColors } from "./shape";
 
 const getColoredSVG = (svg: string, shape: string) => {
   const fill = shapeColors[shape];
-  const regex = shape === "orange" ? /fill="#CCCCCC"/g : /fill="gray"/g;
+  const regex =  /fill="gray"/g;
   return svg.replace(regex, `fill="${fill}"`);
 };
 

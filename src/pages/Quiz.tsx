@@ -19,6 +19,7 @@ import { ColorUpGame } from "../lib/Game/ColorUpGame";
 import { SortGame } from "../lib/Game/SortGame";
 import { BoxGame } from "../lib/Game/BoxGame";
 import EquationGame from "../lib/Game/DivisionGame";
+import Hint from "@/lib/Game/hint";
 
 interface Question {
     questionId: number;
@@ -48,37 +49,27 @@ interface Question {
     };
 }
 
-const HINT = {
-    question: "Need help?",
-    steps: [
-        "Look at the objects carefully.",
-        "Follow the instruction on the screen.",
-        "Try moving one item at a time.",
-    ],
-    answer: "🎉",
-};
 
 const Quiz: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [current, setCurrent] = useState(0);
     const [answeredFlags, setAnsweredFlags] = useState<Record<number, boolean>>({});
-    const [showHint, setShowHint] = useState(false);
     const [error, setError] = useState("");
     const [showCongrats, setShowCongrats] = useState(false);
     const [loading, setLoading] = useState(true);
-const [q,setQ] = useState({} as Question)
+    const [q, setQ] = useState({} as Question)
     console.log("🚀 ~ q:", q)
     const navigate = useNavigate();
     const { toast } = useToast();
     const { user, isAuthenticated, setUserProgress } = useAuth();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-    useEffect(()=>{
+    useEffect(() => {
         if (questions.length > 0) {
             setQ(questions[current])
         }
-      
-    },[questions,current])
+
+    }, [questions, current])
     useEffect(() => {
         if (!isAuthenticated) {
             navigate("/login");
@@ -269,14 +260,7 @@ const [q,setQ] = useState({} as Question)
                     <Card>
                         <CardContent className="p-6 pb-20 space-y-6">
                             <div className="flex justify-end ">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setShowHint(true)}
-                                    className="text-mathpath-purple border-mathpath-purple hover:bg-mathpath-lightPurple"
-                                >
-                                    <Lightbulb className="h-5 w-5" />
-                                    Hint
-                                </Button>
+                                <Hint gameType={q.gameType} />
                             </div>
 
                             <h2 className="text-xl font-semibold text-start capitalize">
@@ -346,35 +330,7 @@ const [q,setQ] = useState({} as Question)
                 </div>
             </div>
 
-            <Dialog open={showHint} onOpenChange={setShowHint}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Hint</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <div className="text-lg font-medium">{HINT.question}</div>
-                        <div className="space-y-2">
-                            {HINT.steps.map((step, i) => (
-                                <div key={i} className="flex items-start gap-2">
-                                    <div className="bg-mathpath-lightPurple text-mathpath-purple rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0">
-                                        {i + 1}
-                                    </div>
-                                    <p>{step}</p>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="font-medium">Answer: {HINT.answer}</div>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            onClick={() => setShowHint(false)}
-                            className="bg-mathpath-purple hover:bg-purple-600"
-                        >
-                            OK
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+
 
             <Dialog open={showCongrats} onOpenChange={setShowCongrats}>
                 <DialogContent className="sm:max-w-md">
