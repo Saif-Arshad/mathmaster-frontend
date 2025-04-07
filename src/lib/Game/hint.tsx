@@ -27,7 +27,7 @@ const HINTS: Record<GameType, HintContent> = {
             "Count the pictures slowly, pointing at each one.",
             "Look at the number in the question.",
             "Tap that many pictures to colour them.",
-            
+
         ],
         answer: "Count, then colour 🎨",
     },
@@ -62,7 +62,7 @@ const HINTS: Record<GameType, HintContent> = {
 
 
 
-const Hint = ({ gameType }:any) => {
+const Hint = ({ gameType, questionHint }: any) => {
     const [open, setOpen] = useState(false);
     switch (gameType) {
         case "Equation Game":
@@ -113,7 +113,10 @@ const Hint = ({ gameType }:any) => {
                                 </div>
                             ))}
                         </div>
-
+                        {
+                            questionHint &&
+                            <img src={questionHint.image} alt="" />
+                        }
                         <p className="font-medium">Remember: {hint.answer}</p>
                     </div>
 

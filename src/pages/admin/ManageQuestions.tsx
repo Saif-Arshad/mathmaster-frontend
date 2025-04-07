@@ -146,6 +146,56 @@ const ManageQuestions: React.FC = () => {
 
 
   const handleAddQuestion = async () => {
+    if (!formData.level_id || !formData.question_text || !formData.game) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fill in all required fields (Level, Question Text, and Game)',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Game-specific validation
+    if (formData.game === 'Color Up Game') {
+      if (!formData.colorUp_shape || !formData.colorUp_totalItem || !formData.colorUp_coloredCount) {
+        toast({
+          title: 'Validation Error',
+          description: 'Color Up Game requires Shape, Total Items, and Colored Count',
+          variant: 'destructive',
+        });
+        return;
+      }
+    } else if (formData.game === 'Sort Game') {
+      if (!formData.sort_shape || !formData.sort_totalItem || !formData.sort_order) {
+        toast({
+          title: 'Validation Error',
+          description: 'Sort Game requires Shape, Total Items, and Sort Order',
+          variant: 'destructive',
+        });
+        return;
+      }
+    } else if (formData.game === 'Box Game') {
+      if (!formData.box_shape || !formData.box_firstBoxCount || !formData.box_secondBoxCount) {
+        toast({
+          title: 'Validation Error',
+          description: 'Box Game requires Shape, First Box Count, and Second Box Count',
+          variant: 'destructive',
+        });
+        return;
+      }
+    } else if (formData.game === 'Equation Game') {
+      if (!formData.equation_shape || !formData.equation_operation || 
+          !formData.equation_finalBoxcount || !formData.equation_firstBoxCount || 
+          !formData.equation_secondBoxCount) {
+        toast({
+          title: 'Validation Error',
+          description: 'Equation Game requires Shape, Operation, Final Box Count, First Box Count, and Second Box Count',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     setActionLoading(true);
     try {
       await axios.post(`${backendUrl}/admin/questions`, {

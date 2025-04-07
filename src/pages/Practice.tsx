@@ -41,6 +41,7 @@ interface Question {
   equation_shape?: string;
   equation_operation?: string;
   equation_finalBoxcount?: number;
+  hint?: any;
   equation_firstBoxCount?: number;
   equation_secondBoxCount?: number;
   level: {
@@ -319,9 +320,9 @@ const Practice: React.FC = () => {
                     {q?.level?.level_name}
                   </p>
                 </span>
-                <span>
+                {/* <span>
                   {correctCount} correct out of {totalAnswered} answered
-                </span>
+                </span> */}
               </div>
 
               <Card>
@@ -329,7 +330,7 @@ const Practice: React.FC = () => {
                   <div className="flex justify-end ">
                   <div className="flex items-center gap-3 ">
 
-                    <Hint gameType={q.gameType} />
+                    <Hint gameType={q.gameType} questionHint={q.hint} />
                     <Button
                       onClick={() => navigate('/quiz')}
                       className="bg-mathpath-purple hover:bg-purple-600 text-white px-8 py-4 text-lg"

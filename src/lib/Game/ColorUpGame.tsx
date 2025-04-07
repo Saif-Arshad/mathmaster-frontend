@@ -16,12 +16,14 @@ type Props = {
 
 export const ColorUpGame: React.FC<Props> = ({
   shape = "guava",
-  totalItems,
-  colorCount,
+  totalItems=5,
+  colorCount=1,
   isCorrect,
   id,
   setIsCorrect
 }) => {
+  console.log("🚀 ~ colorCount:", colorCount)
+  console.log("🚀 ~ totalItems:", totalItems)
   const [colored, setColored] = useState(Array(totalItems).fill(false));
   console.log("🚀 ~ colored:", colored)
 
