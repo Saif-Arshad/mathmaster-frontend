@@ -259,9 +259,7 @@ const Quiz: React.FC = () => {
 
                     <Card>
                         <CardContent className="p-6 pb-20 space-y-6">
-                            <div className="flex justify-end ">
-                                <Hint gameType={q.gameType} />
-                            </div>
+                          
 
                             <h2 className="text-xl font-semibold text-start capitalize">
                                 {q.question}

@@ -20,7 +20,7 @@ export const ColorUpGame: React.FC<Props> = ({ shape ="guava", totalItems, color
     const arr = [...colored];
     arr[idx] = !arr[idx];
     setColored(arr);
-    setIsCorrect(arr.filter(Boolean).length === colorCount);
+    // setIsCorrect(arr.filter(Boolean).length === colorCount);
   };
 
   return (

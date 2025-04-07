@@ -19,7 +19,7 @@ import { shapes, shapeColors } from "./shape";
 
 const getColoredSVG = (svg: string, shape: string) => {
   const fill = shapeColors[shape];
-  const regex =  /fill="gray"/g;
+  const regex = /fill="gray"/g;
   return svg.replace(regex, `fill="${fill}"`);
 };
 
@@ -62,9 +62,9 @@ const Tile: React.FC<
       <div
         className="pointer-events-none"
         dangerouslySetInnerHTML={{
-          __html: isCorrect
-            ? getColoredSVG(shapes[shape].uncolored, shape)
-            : shapes[shape].uncolored,
+          __html:
+            getColoredSVG(shapes[shape].uncolored, shape)
+
         }}
       />
       <div className="h-7 w-7 p-1 mt-4 bg-mathpath-purple rounded-full flex items-center justify-center">

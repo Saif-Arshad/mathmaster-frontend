@@ -51,7 +51,7 @@ const EquationGame: React.FC<Props> = ({
     result,
     isCorrect,
     setIsCorrect,
-    shapeSize = 48,
+    shapeSize = 68,
 }) => {
     console.log("Props received:", { shape, operand1, operand2, operation, result });
 
@@ -120,7 +120,7 @@ const EquationGame: React.FC<Props> = ({
     const ShapeIcon = ({ colored }: { colored?: boolean }) => (
         <div
             style={{ width: shapeSize, height: shapeSize }}
-            dangerouslySetInnerHTML={{ __html: colored ? filledSvg : baseSvg }}
+            dangerouslySetInnerHTML={{ __html: filledSvg}}
         />
     );
 
@@ -130,7 +130,7 @@ const EquationGame: React.FC<Props> = ({
                 <div
                     ref={p.innerRef}
                     {...p.droppableProps}
-                    className="flex flex-wrap bg-white rounded-lg p-2 shadow-sm min-h-[64px] w-full sm:w-48"
+                    className="flex flex-wrap bg-white rounded-lg p-2 shadow-sm min-h-[150px] w-full sm:w-64"
                 >
                     {items.map((it, idx) => (
                         <Draggable key={it.id} draggableId={it.id} index={idx}>
@@ -152,7 +152,7 @@ const EquationGame: React.FC<Props> = ({
     );
 
     const renderStaticBucket = (count: number, colored?: boolean) => (
-        <div className="grid grid-cols-3 gap-4 bg-gray-200 rounded-lg p-2 py-5 shadow-sm h-full min-h-[64px] w-full sm:w-56">
+        <div className="grid grid-cols-3 gap-4 bg-gray-200 rounded-lg p-2 py-5 shadow-sm h-full min-h-[64px] w-full sm:w-64">
             {Array.from({ length: count }).map((_, i) => (
                 <ShapeIcon key={i} colored={colored} />
             ))}
@@ -160,7 +160,7 @@ const EquationGame: React.FC<Props> = ({
     );
 
     return (
-        <div className="flex flex-col items-center space-y-6 p-4 w-full max-w-3xl mx-auto">
+        <div className="flex flex-col items-center space-y-6 p-4 w-full max-w-full mx-auto">
             <DragDropContext onDragEnd={onDragEnd}>
                 {renderBucket(source, "src")}
                 <div className="flex items-center justify-center flex-wrap gap-2 text-3xl font-bold mt-4 w-full">

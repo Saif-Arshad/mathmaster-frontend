@@ -48,7 +48,7 @@ export const BoxGame: React.FC<Props> = ({ shape = "guava", startInBox, targetIn
     };
 
     const svg = sizeSvg(shapes[shape].uncolored, 40);
-    const coloredSvg = sizeSvg(getColoredSVG(shapes[shape].uncolored, shape), 40);
+    const coloredSvg = sizeSvg(getColoredSVG(shapes[shape].uncolored, shape), 70);
 
     const renderItems = (arr: any[], droppableId: string) => (
         <Droppable droppableId={droppableId} direction="horizontal">
@@ -57,7 +57,7 @@ export const BoxGame: React.FC<Props> = ({ shape = "guava", startInBox, targetIn
                     {arr.map((it, idx) => (
                         <Draggable key={it.id} draggableId={it.id} index={idx}>
                             {(p) => (
-                                <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps} className="  m-1" dangerouslySetInnerHTML={{ __html: droppableId === "inBox" && isCorrect ? coloredSvg : svg }} />
+                                <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps} className="  m-1" dangerouslySetInnerHTML={{ __html:  coloredSvg  }} />
                             )}
                         </Draggable>
                     ))}

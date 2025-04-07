@@ -27,6 +27,7 @@ const HINTS: Record<GameType, HintContent> = {
             "Count the pictures slowly, pointing at each one.",
             "Look at the number in the question.",
             "Tap that many pictures to colour them.",
+            
         ],
         answer: "Count, then colour 🎨",
     },
