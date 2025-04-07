@@ -28,6 +28,7 @@ type Item = { id: string; number: number };
 type Props = {
   shape: keyof typeof shapes;
   totalItem: number;
+  id: number;
   order: "asc" | "desc";
   isCorrect: boolean;
   setIsCorrect: (v: boolean) => void;
@@ -78,6 +79,7 @@ export const SortGame: React.FC<Props> = ({
   shape = "guava",
   totalItem,
   order,
+  id,
   isCorrect,
   setIsCorrect,
 }) => {
@@ -91,7 +93,7 @@ export const SortGame: React.FC<Props> = ({
   useEffect(() => {
     setItems(make(totalItem));
     setIsCorrect(false);
-  }, [totalItem]);
+  }, [totalItem, id]);
 
   /* dnd‑kit sensors */
   const sensors = useSensors(useSensor(PointerSensor));

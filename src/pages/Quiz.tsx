@@ -23,6 +23,7 @@ import Hint from "@/lib/Game/hint";
 
 interface Question {
     questionId: number;
+    question_id: number;
     question: string;
     gameType: "Color Up Game" | "Sort Game" | "Box Game" | "Equation Game";
     difficulty: number;
@@ -160,6 +161,8 @@ const Quiz: React.FC = () => {
             case "Color Up Game":
                 return (
                     <ColorUpGame
+                        id={q.question_id!}
+
                         shape={q.colorUp_shape as any}
                         totalItems={q.colorUp_totalItem!}
                         colorCount={q.colorUp_coloredCount!}
@@ -170,6 +173,8 @@ const Quiz: React.FC = () => {
             case "Sort Game":
                 return (
                     <SortGame
+                        id={q.question_id!}
+
                         shape={q.sort_shape as any}
                         totalItem={q.sort_totalItem!}
                         order={q.sort_order as any}
@@ -180,6 +185,8 @@ const Quiz: React.FC = () => {
             case "Box Game":
                 return (
                     <BoxGame
+                        id={q.question_id!}
+
                         shape={q.box_shape as any}
                         startInBox={q.box_firstBoxCount!}
                         targetInBox={q.box_secondBoxCount!}
@@ -190,6 +197,8 @@ const Quiz: React.FC = () => {
             case "Equation Game":
                 return (
                     <EquationGame
+                        id={q.question_id!}
+
                         shape={q.equation_shape as any}
                         operand1={q.equation_firstBoxCount!}
                         operand2={q.equation_secondBoxCount!}
@@ -259,7 +268,7 @@ const Quiz: React.FC = () => {
 
                     <Card>
                         <CardContent className="p-6 pb-20 space-y-6">
-                          
+
 
                             <h2 className="text-xl font-semibold text-start capitalize">
                                 {q.question}

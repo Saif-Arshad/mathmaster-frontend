@@ -7,8 +7,8 @@ import { Users, BookOpen, BarChart, Settings, Layers, LogOut, HelpCircle } from 
 import { useAuth } from '@/contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
-    const { logout } = useAuth();
-  
+  const { logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
@@ -18,9 +18,9 @@ const AdminDashboard: React.FC = () => {
               <span className="text-2xl font-bold text-mathpath-purple">MathMaster Admin</span>
             </div>
             <div>
-                <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={logout}
                 className="flex items-center gap-1"
               >
@@ -73,9 +73,9 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </Link>
-      
 
-       
+
+
 
           <Link to="/admin/levels" className="block">
             <Card className="h-full transition-all hover:shadow-md">
@@ -109,9 +109,25 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </Link>
-        
+          <Link to="/admin/hints" className="block">
+            <Card className="h-full transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <HelpCircle className="mr-2 h-5 w-5 text-mathpath-purple" />
+                  Manage Hints
+                </CardTitle>
+                <CardDescription>Add, edit or delete hints</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">
+                  Modify practice hints across all levels
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
 
-      
+
+
         </div>
       </main>
     </div>

@@ -24,6 +24,7 @@ import Hint from "@/lib/Game/hint";
 
 interface Question {
   questionId: number;
+  question_id: number;
   question: string;
   gameType: "Color Up Game" | "Sort Game" | "Box Game" | "Equation Game";
   difficulty: number;
@@ -76,13 +77,13 @@ const Practice: React.FC = () => {
   const { toast } = useToast();
   const { user, isAuthenticated, setUserProgress, userProgress } = useAuth();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-   const [q, setQ] = useState({} as Question)
-    useEffect(() => {
-        if (questions.length > 0) {
-            setQ(questions[current])
-        }
+  const [q, setQ] = useState({} as Question)
+  useEffect(() => {
+    if (questions.length > 0) {
+      setQ(questions[current])
+    }
 
-    }, [questions, current])
+  }, [questions, current])
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -151,50 +152,54 @@ const Practice: React.FC = () => {
 
 
 
-  const continueLevelUp = () => {
-    setShowLevelUpModal(true);
-  };
+
 
   const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const { data } = await axios.post(
-        `${backendUrl}/admin/questions/submit`,
-        {
-          user_id: user?.user_id,
-          level_id: q.level.level_id,
-          correct_answers: 5,
-          total_questions: current + 1,
-        }
-      );
-      if (data) {
-        console.log("🚀 ~ continueLevelUp ~ data:", data)
+    // setLoading(true);
+    // try {
+    //   const { data } = await axios.post(
+    //     `${backendUrl}/admin/questions/submit`,
+    //     {
+    //       user_id: user?.user_id,
+    //       level_id: q.level.level_id,
+    //       correct_answers: 5,
+    //       total_questions: current + 1,
+    //     }
+    //   );
+    //   if (data) {
+    //     console.log("🚀 ~ continueLevelUp ~ data:", data)
 
-        toast({
-          title: "Success",
-          description: "Level up successfully!",
-          variant: "default",
-        });
-        setUserProgress((prev: any) => ({
-          ...prev,
-          progress: data.progress,
-        }));
-        setisLastSublevel(data.isLastSubLevel)
-        setShowLevelUpModal(false);
-        if (current < questions.length - 1) next();
-      }
-    }
-    catch (e: any) {
-      toast({
-        title: "Error",
-        description: e.response?.data?.message || e.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+
+    //     setUserProgress((prev: any) => ({
+    //       ...prev,
+    //       progress: data.progress,
+    //     }));
+    //     setisLastSublevel(data.isLastSubLevel)
+    //     if (current < questions.length - 1) next();
+    //   }
+    // }
+    // catch (e: any) {
+    //   toast({
+    //     title: "Error",
+    //     description: e.response?.data?.message || e.message,
+    //     variant: "destructive",
+    //   });
+    // } finally {
+    //   setLoading(false);
+    // }
+    toast({
+      title: "Success",
+      description: "Level up successfully!",
+      variant: "default",
+    });
+    setShowLevelUpModal(true);
 
   };
+  const continueLevelUp = () => {
+    setShowLevelUpModal(false);
+    setCurrent(current + 1)
+
+  }
 
   const renderGame = () => {
     switch (q.gameType) {
@@ -203,6 +208,7 @@ const Practice: React.FC = () => {
           <ColorUpGame
             shape={q.colorUp_shape as any}
             totalItems={q.colorUp_totalItem!}
+            id={q.question_id!}
             colorCount={q.colorUp_coloredCount!}
             isCorrect={q.questionId in answeredFlags ? !!answeredFlags[q.questionId] : false}
             setIsCorrect={setIsCorrect}
@@ -211,6 +217,8 @@ const Practice: React.FC = () => {
       case "Sort Game":
         return (
           <SortGame
+            id={q.question_id!}
+
             shape={q.sort_shape as any}
             totalItem={q.sort_totalItem!}
             order={q.sort_order as any}
@@ -222,6 +230,7 @@ const Practice: React.FC = () => {
         return (
           <BoxGame
             shape={q.box_shape as any}
+            id={q.question_id!}
             startInBox={q.box_firstBoxCount!}
             targetInBox={q.box_secondBoxCount!}
             isCorrect={q.questionId in answeredFlags ? !!answeredFlags[q.questionId] : false}
@@ -231,6 +240,8 @@ const Practice: React.FC = () => {
       case "Equation Game":
         return (
           <EquationGame
+            id={q.question_id!}
+
             shape={q.equation_shape as any}
             operand1={q.equation_firstBoxCount!}
             operand2={q.equation_secondBoxCount!}
@@ -316,7 +327,16 @@ const Practice: React.FC = () => {
               <Card>
                 <CardContent className="p-6 pb-20 space-y-6">
                   <div className="flex justify-end ">
+                  <div className="flex items-center gap-3 ">
+
                     <Hint gameType={q.gameType} />
+                    <Button
+                      onClick={() => navigate('/quiz')}
+                      className="bg-mathpath-purple hover:bg-purple-600 text-white px-8 py-4 text-lg"
+                    >
+                      Take the Quiz
+                    </Button>
+                  </div>
                   </div>
 
                   <h2 className="text-xl font-semibold text-start capitalize">{q.question}</h2>
@@ -350,7 +370,6 @@ const Practice: React.FC = () => {
                   ) : (
                     <Button
                       onClick={next}
-                      disabled={!(q.questionId in answeredFlags) || current === questions.length - 1}
                       className="bg-mathpath-purple hover:bg-purple-600"
                     >
                       Next

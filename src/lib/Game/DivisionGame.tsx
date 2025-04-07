@@ -38,6 +38,7 @@ type Props = {
     operand2: number;
     operation: "+" | "-" | "*";
     result: number;
+    id: number;
     isCorrect: boolean;
     setIsCorrect: (v: boolean) => void;
     shapeSize?: number;
@@ -49,13 +50,14 @@ const EquationGame: React.FC<Props> = ({
     operand2,
     operation,
     result,
+    id,
     isCorrect,
     setIsCorrect,
     shapeSize = 68,
 }) => {
     console.log("Props received:", { shape, operand1, operand2, operation, result });
 
-    const extraItems = 2; 
+    const extraItems = 2;
     const totalSourceItems = operand2 + extraItems;
 
     const [box2, setBox2] = useState<Array<{ id: string }>>([]);
@@ -67,7 +69,7 @@ const EquationGame: React.FC<Props> = ({
         setSrc(Array.from({ length: totalSourceItems }, (_, i) => ({ id: `src-${i}` })));
         setBox2([]);
         setIsCorrect(false);
-    }, [operand1, operand2, operation, result, totalSourceItems]);
+    }, [operand1, operand2, operation, result, id, totalSourceItems]);
 
 
     console.log("Initial source length:", source.length);
@@ -120,7 +122,7 @@ const EquationGame: React.FC<Props> = ({
     const ShapeIcon = ({ colored }: { colored?: boolean }) => (
         <div
             style={{ width: shapeSize, height: shapeSize }}
-            dangerouslySetInnerHTML={{ __html: filledSvg}}
+            dangerouslySetInnerHTML={{ __html: filledSvg }}
         />
     );
 

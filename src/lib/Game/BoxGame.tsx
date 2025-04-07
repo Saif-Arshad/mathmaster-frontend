@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { shapes, shapeColors } from "./shape";
 
@@ -8,18 +8,23 @@ const sizeSvg = (svg: string, size: number) => svg.replace(/width="\d+"/g, `widt
 
 type Props = {
     shape: keyof typeof shapes;
-    startInBox: number;   
-    targetInBox: number;  
+    startInBox: number;
+    targetInBox: number;
+    id: number;
     isCorrect: boolean;
     setIsCorrect: (v: boolean) => void;
 };
 
-export const BoxGame: React.FC<Props> = ({ shape = "guava", startInBox, targetInBox, isCorrect, setIsCorrect }) => {
+export const BoxGame: React.FC<Props> = ({ shape = "guava", id, startInBox, targetInBox, isCorrect, setIsCorrect }) => {
     console.log("🚀 ~ shape:", targetInBox)
 
     const [inBox, setInBox] = useState(Array.from({ length: startInBox }, (_, i) => ({ id: `in-${i}` })));
     const [outBox, setOutBox] = useState<{ id: string }[]>([]);
 
+
+    useEffect(() => {
+        setOutBox([])
+    }, [id])
     const move = (src: any[], dst: any[], sIdx: number, dIdx: number) => {
         const cloneSrc = Array.from(src);
         const cloneDst = Array.from(dst);
@@ -38,7 +43,7 @@ export const BoxGame: React.FC<Props> = ({ shape = "guava", startInBox, targetIn
             const { cloneSrc, cloneDst } = move(inBox, outBox, source.index, destination.index);
             setInBox(cloneSrc);
             setOutBox(cloneDst);
-            setIsCorrect(cloneDst.length === targetInBox); 
+            setIsCorrect(cloneDst.length === targetInBox);
         } else {
             const { cloneSrc, cloneDst } = move(outBox, inBox, source.index, destination.index);
             setOutBox(cloneSrc);
@@ -57,7 +62,7 @@ export const BoxGame: React.FC<Props> = ({ shape = "guava", startInBox, targetIn
                     {arr.map((it, idx) => (
                         <Draggable key={it.id} draggableId={it.id} index={idx}>
                             {(p) => (
-                                <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps} className="  m-1" dangerouslySetInnerHTML={{ __html:  coloredSvg  }} />
+                                <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps} className="  m-1" dangerouslySetInnerHTML={{ __html: coloredSvg }} />
                             )}
                         </Draggable>
                     ))}

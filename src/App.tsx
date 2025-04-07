@@ -27,6 +27,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import Settings from "./pages/Settings";
 import Contact from "./pages/Contact";
 import Quiz from "./pages/Quiz";
+import ManageHints from "./pages/admin/Hint";
 
 
 // Create a client
@@ -118,6 +119,11 @@ const App: React.FC = () => {
               <Route path="/admin/levels" element={
                 <ProtectedRoute requireAuth={true} requireAdmin={true}>
                   <ManageLevels />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/hints" element={
+                <ProtectedRoute requireAuth={true} requireAdmin={true}>
+                  <ManageHints />
                 </ProtectedRoute>
               } />
               <Route path="/admin/users" element={

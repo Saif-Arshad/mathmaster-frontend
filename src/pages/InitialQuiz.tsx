@@ -104,6 +104,8 @@ const InitialQuiz: React.FC = () => {
         return (
           <ColorUpGame
             shape={q.colorUp_shape as any}
+            id={q.quiz_id!}
+
             totalItems={q.colorUp_totalItem!}
             colorCount={q.colorUp_coloredCount!}
             isCorrect={correctFlags[q.quiz_id] ?? false}
@@ -114,6 +116,8 @@ const InitialQuiz: React.FC = () => {
         return (
           <SortGame
             shape={q.sort_shape as any}
+            id={q.quiz_id!}
+
             totalItem={q.sort_totalItem!}
             order={q.sort_order as any}
             isCorrect={correctFlags[q.quiz_id] ?? false}
@@ -124,6 +128,8 @@ const InitialQuiz: React.FC = () => {
         return (
           <BoxGame
             shape={q.box_shape as any}
+            id={q.quiz_id!}
+
             startInBox={q.box_firstBoxCount!}
             targetInBox={q.box_secondBoxCount!}
             isCorrect={correctFlags[q.quiz_id] ?? false}
@@ -134,6 +140,8 @@ const InitialQuiz: React.FC = () => {
         return (
           <EquationGame
             shape={q.equation_shape as any}
+            id={q.quiz_id!}
+
             operand1={q.equation_firstBoxCount!}
             operand2={q.equation_secondBoxCount!}
             operation={q.equation_operation}
